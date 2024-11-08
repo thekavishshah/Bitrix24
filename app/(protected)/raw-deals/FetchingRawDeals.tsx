@@ -1,5 +1,6 @@
 "use client";
 
+import RawDealCard from "@/components/RawDealCard";
 import { Button } from "@/components/ui/button";
 import { fetchDocumentsWithPagination, SnapshotDeal } from "@/lib/firebase/db";
 import { useEffect, useState } from "react";
@@ -56,8 +57,11 @@ const FetchingRawDeals = () => {
 
   return (
     <div>
-      {/* Display the deals */}
-      {/* <PresentRawDeals fileContent={fileContent} deals={data} /> */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {data.map((e) => {
+          return <RawDealCard key={e.id} deal={e} />;
+        })}
+      </div>
 
       {/* Pagination controls */}
       <div className="space-x-2 justify-end mt-4 w-full">
