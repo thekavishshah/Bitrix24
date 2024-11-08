@@ -1,6 +1,6 @@
 import React from "react";
 
-const PublishedDealsPage = () => {
+const PublishedDealsPage = async () => {
   return <div>PublishedDealsPage</div>;
 };
 

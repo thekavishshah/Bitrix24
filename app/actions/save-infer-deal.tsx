@@ -2,7 +2,7 @@
 
 import { InferDealSchema } from "@/components/schemas/infer-deal-schema";
 import { db } from "@/lib/firebase/init";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 
 // create a sample zod schema
 
@@ -29,6 +29,7 @@ export default async function SaveInferredDeal({
 
     const docRef = await addDoc(collection(db, "inferred-deals"), {
       ...validatedFields.data,
+      created_at: serverTimestamp(),
     });
 
     console.log("Document written with ID: ", docRef.id);
