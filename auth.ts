@@ -1,7 +1,11 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 
-const allowedEmails = ["rg5353070@gmail.com", "daigbe@gmail.com"]; // Replace with your allowed email addresses
+const allowedEmails = [
+  "rg5353070@gmail.com",
+  "daigbe@gmail.com",
+  "ayan@darkalphacapital.com",
+];
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [Google],
