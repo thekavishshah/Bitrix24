@@ -5,22 +5,25 @@ import { GeistSans } from "geist/font/sans";
 import { cn } from "@/lib/utils";
 import Header from "@/components/Header";
 import { Toaster } from "@/components/ui/toaster";
+import { auth } from "@/auth";
 
 export const metadata: Metadata = {
   title: "Dark Alpha Capital Deal Sourcing Organization",
   description: "Sourcing and Scrape Deals with AI",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
+
   return (
     <html lang="en" className={cn(GeistSans.variable)}>
       <body className={` antialiased`}>
         <main>
-          <Header />
+          <Header session={session} />
 
           {children}
         </main>

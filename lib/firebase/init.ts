@@ -5,12 +5,12 @@ import { getAuth } from "firebase/auth";
 import { getFunctions } from "firebase/functions";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDYAptWHwAYC4GoLpO-R_zMMxscKzwseQo",
-  authDomain: "deal-sourcing-scraper.firebaseapp.com",
-  projectId: "deal-sourcing-scraper",
-  storageBucket: "deal-sourcing-scraper.firebasestorage.app",
-  messagingSenderId: "54092164401",
-  appId: "1:54092164401:web:eee4dfb062cf5c04df5410",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
 // Initialize Firebase

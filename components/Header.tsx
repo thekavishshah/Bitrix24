@@ -13,14 +13,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
+import { signOut, useSession } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // import { liteClient as algoliasearch } from "algoliasearch/lite";
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Session } from "next-auth";
 
 type HeaderProps = {
+  session: Session | null;
   classname?: string;
 };
 
@@ -32,7 +34,7 @@ export const NavLinks = [
   { navlink: "/infer", navlabel: "Infer" },
 ];
 
-const Header = ({ classname }: HeaderProps) => {
+const Header = ({ classname, session }: HeaderProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
 
@@ -88,6 +90,7 @@ const Header = ({ classname }: HeaderProps) => {
               })}
             </div>
             <DesktopMenu />
+            {session ? <ProfileMenu session={session} /> : <AuthDialogNavs />}
           </ul>
         </nav>
       </header>
@@ -143,12 +146,15 @@ function AuthDialogNavs() {
   );
 }
 
-function ProfileMenu() {
+function ProfileMenu({ session }: { session: Session }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="flex items-center gap-2">
         <Avatar>
-          <AvatarImage src={"https://github.com/shadcn.png"} alt="@shadcn" />
+          <AvatarImage
+            src={session.user?.image || "https://github.com/shadcn.png"}
+            alt="@shadcn"
+          />
           <AvatarFallback>CN</AvatarFallback>
         </Avatar>
         <span className="flex items-center font-medium text-baseC">
@@ -156,7 +162,13 @@ function ProfileMenu() {
         </span>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem onClick={() => {}}>Logout</DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => {
+            signOut();
+          }}
+        >
+          Logout
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
