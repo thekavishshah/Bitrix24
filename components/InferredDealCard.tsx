@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "./ui/button";
 import Link from "next/link";
-import { DollarSign, MapPinIcon } from "lucide-react";
+import { DollarSign, Edit, MapPinIcon } from "lucide-react";
 
 const InferredDealCard = ({
   dealId,
@@ -30,6 +30,13 @@ const InferredDealCard = ({
     <Card>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
+        <div>
+          <Button variant="outline" size="icon" asChild>
+            <Link href={`/raw-deals/${dealId}/edit`}>
+              <Edit className="h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         {category && (

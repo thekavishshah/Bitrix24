@@ -1,6 +1,7 @@
 "use client";
 
 import InferredDealCard from "@/components/InferredDealCard";
+import DealCardSkeleton from "@/components/skeletons/DealCardSkeleton";
 import { Button } from "@/components/ui/button";
 import { fetchDocumentsWithPagination, SnapshotDeal } from "@/lib/firebase/db";
 import { useEffect, useState } from "react";
@@ -10,13 +11,16 @@ const FetchingInferredDeals = () => {
   const [page, setPage] = useState(1);
   const [isNextAvailable, setIsNextAvailable] = useState(false);
   const [isPreviousAvailable, setIsPreviousAvailable] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    setLoading(true);
     const fetchData = async () => {
       const documents = await fetchDocumentsWithPagination(
         "inferred-deals",
         35
       );
+      setLoading(false);
 
       console.log("fetchedDeals", documents);
       setData(documents);
@@ -26,8 +30,10 @@ const FetchingInferredDeals = () => {
   }, []);
 
   const showNext = async (item: SnapshotDeal) => {
+    setLoading(true);
     if (data.length === 0) {
       alert("No more deals to show");
+      setLoading(false);
     } else {
       const nextItems = await fetchDocumentsWithPagination(
         "inferred-deals",
@@ -35,6 +41,7 @@ const FetchingInferredDeals = () => {
         "next",
         item
       );
+      setLoading(false); // Set loading to false after fetching completes
       if (nextItems.length > 0) {
         setData(nextItems);
         setPage(page + 1);
@@ -45,12 +52,14 @@ const FetchingInferredDeals = () => {
   };
 
   const showPrevious = async (item: SnapshotDeal) => {
+    setLoading(true);
     const previousItems = await fetchDocumentsWithPagination(
       "inferred-deals",
       35,
       "previous",
       item
     );
+    setLoading(false);
     if (previousItems.length > 0) {
       setData(previousItems);
       setPage(page - 1);
@@ -63,19 +72,32 @@ const FetchingInferredDeals = () => {
 
   return (
     <div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {data.map((e) => {
-          return (
-            <InferredDealCard
-              key={e.id}
-              dealId={e.id}
-              title={e.title}
-              ebitda={e.revenue}
-              category={e.category}
-              asking_price={e.asking_price}
-            />
-          );
-        })}
+      <div>
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <DealCardSkeleton />
+            <DealCardSkeleton />
+            <DealCardSkeleton />
+            <DealCardSkeleton />
+            <DealCardSkeleton />
+            <DealCardSkeleton />
+            <DealCardSkeleton />
+            <DealCardSkeleton />
+          </div> // Replace with a spinner or skeleton if preferred
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {data.map((e) => (
+              <InferredDealCard
+                key={e.id}
+                dealId={e.id}
+                title={e.title}
+                ebitda={e.revenue}
+                category={e.category}
+                asking_price={e.asking_price}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="space-x-2 justify-end mt-4 w-full">

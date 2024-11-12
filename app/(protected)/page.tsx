@@ -24,7 +24,7 @@ const Home = async () => {
               </Link>
             </Button>
             <Button
-              className="px-8 py-6 rounded-full  font-semibold transition-all duration-300   focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-opacity-75 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              className="px-8 py-6 rounded-full  font-semibold transition-all duration-300  focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-opacity-75 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
               variant={"secondary"}
               asChild
             >
