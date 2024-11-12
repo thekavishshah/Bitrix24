@@ -28,8 +28,8 @@ const Home = async () => {
               variant={"secondary"}
               asChild
             >
-              <Link href={"/get-started"}>
-                Get Started
+              <Link href={"/new-deal"}>
+                Add New Deal
                 <ArrowRight className="inline-block ml-2 h-5 w-5" />
               </Link>
             </Button>

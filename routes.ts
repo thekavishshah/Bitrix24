@@ -19,12 +19,14 @@ export const PROTECTED_ROUTES = [
   "/raw-deals",
   "/",
   "/inferred-deals",
+  "/manual-deals",
   "/published-deals",
   "/infer",
 ];
 
 export const PROTECTED_BASE_ROUTES = [
   "/raw-deals",
+  "/manual-deals",
   "/published-deals",
   "/inferred-deals",
 ];

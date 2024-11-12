@@ -99,8 +99,6 @@ export async function fetchDocumentsWithPagination(
       );
     }
 
-    console.log("q:", q);
-
     const querySnapshot = await getDocs(q);
     const documents: any = [];
     querySnapshot.forEach((doc) => {
@@ -112,6 +110,9 @@ export async function fetchDocumentsWithPagination(
 
     return documents;
   } catch (error) {
+    if (error instanceof Error) {
+      console.log("error Error fetching documents", error.message);
+    }
     console.error("Error fetching documents: ", error);
     return [];
   }
@@ -251,6 +252,28 @@ export async function fetchSpecificInferredDeal(
 ): Promise<SnapshotDeal | null> {
   try {
     const dealRef = doc(db, "inferred-deals", dealId); // Replace "deals" with your collection name
+    const dealSnapshot = await getDoc(dealRef);
+
+    if (dealSnapshot.exists()) {
+      return {
+        id: dealSnapshot.id,
+        ...dealSnapshot.data(),
+      } as SnapshotDeal;
+    } else {
+      console.log("No such document!");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching the deal:", error);
+    throw error;
+  }
+}
+
+export async function fetchSpecificManualDeal(
+  dealId: string
+): Promise<SnapshotDeal | null> {
+  try {
+    const dealRef = doc(db, "manual-deals", dealId); // Replace "deals" with your collection name
     const dealSnapshot = await getDoc(dealRef);
 
     if (dealSnapshot.exists()) {

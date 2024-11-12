@@ -27,10 +27,11 @@ type HeaderProps = {
 };
 
 export const NavLinks = [
-  { navlink: "/", navlabel: "Home" },
-  { navlink: "/raw-deals", navlabel: "Raw Deals" },
-  { navlink: "/published-deals", navlabel: "Published Deals" },
-  { navlink: "/inferred-deals", navlabel: "Inferred Deals" },
+  { navlink: "/new-deal", navlabel: "New" },
+  { navlink: "/raw-deals", navlabel: "Raw" },
+  { navlink: "/published-deals", navlabel: "Published" },
+  { navlink: "/manual-deals", navlabel: "Manual" },
+  { navlink: "/inferred-deals", navlabel: "Inferred " },
   { navlink: "/infer", navlabel: "Infer" },
 ];
 

@@ -121,6 +121,9 @@ const RawDealSpecificPage = async ({ params }: { params: Params }) => {
       </div>
 
       <div className="narrow-container mb-8 md:mb-10 lg:mb-12 ">
+        <div className="mx-auto text-center">
+          <Badge className="mb-4">Raw Deal</Badge>
+        </div>
         <h1 className="text-4xl font-bold mb-4 text-center text-gray-900">
           Deal Overview: {title}
         </h1>

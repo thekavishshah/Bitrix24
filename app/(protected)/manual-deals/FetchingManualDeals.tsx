@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { fetchDocumentsWithPagination, SnapshotDeal } from "@/lib/firebase/db";
 import { useEffect, useState } from "react";
 
-const FetchingInferredDeals = () => {
+const FetchingManualDeals = () => {
   const [data, setData] = useState<SnapshotDeal[]>([]);
   const [page, setPage] = useState(1);
   const [isNextAvailable, setIsNextAvailable] = useState(false);
@@ -13,10 +13,8 @@ const FetchingInferredDeals = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const documents = await fetchDocumentsWithPagination(
-        "inferred-deals",
-        35
-      );
+      console.log("fetching initial manual deals");
+      const documents = await fetchDocumentsWithPagination("manual-deals", 35);
 
       console.log("fetchedDeals", documents);
       setData(documents);
@@ -30,7 +28,7 @@ const FetchingInferredDeals = () => {
       alert("No more deals to show");
     } else {
       const nextItems = await fetchDocumentsWithPagination(
-        "inferred-deals",
+        "manual-deals",
         35,
         "next",
         item
@@ -46,7 +44,7 @@ const FetchingInferredDeals = () => {
 
   const showPrevious = async (item: SnapshotDeal) => {
     const previousItems = await fetchDocumentsWithPagination(
-      "inferred-deals",
+      "manual-deals",
       35,
       "previous",
       item
@@ -59,12 +57,11 @@ const FetchingInferredDeals = () => {
     }
   };
 
-  console.log("data", data);
-
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {data.map((e) => {
+          console.log("manual deal", e);
           return (
             <InferredDealCard
               key={e.id}
@@ -101,4 +98,4 @@ const FetchingInferredDeals = () => {
   );
 };
 
-export default FetchingInferredDeals;
+export default FetchingManualDeals;
