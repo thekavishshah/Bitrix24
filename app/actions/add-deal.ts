@@ -6,7 +6,7 @@ import {
   NewDealFormSchemaType,
 } from "@/components/forms/new-deal-form";
 import { db } from "@/lib/firebase/init";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import React from "react";
 
 /**
@@ -46,6 +46,7 @@ const AddDealToFirebase = async (values: NewDealFormSchemaType) => {
 
     const docRef = await addDoc(collection(db, "manual-deals"), {
       ...values,
+      created_at: serverTimestamp(),
     });
 
     console.log("Document written with ID: ", docRef.id);
