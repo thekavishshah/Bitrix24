@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: "Source a New Deal Using AI",
 };
 
-const InferDealPage = () => {
+const InferDealPage = async () => {
   return (
     <div>
       <InferNewDealComponent />

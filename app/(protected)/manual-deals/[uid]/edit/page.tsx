@@ -1,7 +1,7 @@
 import EditDealForm from "@/components/forms/edit-deal-form";
 import PreviousPageButton from "@/components/PreviousPageButton";
 import { Card, CardContent } from "@/components/ui/card";
-import { fetchSpecificInferredDeal } from "@/lib/firebase/db";
+import { fetchSpecificManualDeal } from "@/lib/firebase/db";
 import { Metadata } from "next";
 import React from "react";
 
@@ -15,7 +15,7 @@ export async function generateMetadata({
   const { uid } = await params;
 
   try {
-    const fetchedDeal = await fetchSpecificInferredDeal(uid);
+    const fetchedDeal = await fetchSpecificManualDeal(uid);
     return {
       title: `Edit ${fetchedDeal?.title}` || "Dark Alpha Capital",
       description:
@@ -29,10 +29,10 @@ export async function generateMetadata({
   }
 }
 
-const EditInferredDealPage = async ({ params }: { params: Params }) => {
+const EditManualDealPage = async ({ params }: { params: Params }) => {
   const { uid } = await params;
 
-  const fetchedDeal = await fetchSpecificInferredDeal(uid);
+  const fetchedDeal = await fetchSpecificManualDeal(uid);
 
   if (!fetchedDeal) {
     return (
@@ -91,7 +91,7 @@ const EditInferredDealPage = async ({ params }: { params: Params }) => {
         <Card className="transition-all duration-75 ease-in-out hover:shadow-lg">
           <CardContent className="p-6">
             <EditDealForm
-              dealCollection="inferred-deals"
+              dealCollection="manual-deals"
               title={title}
               first_name={first_name}
               last_name={last_name}
@@ -119,4 +119,4 @@ const EditInferredDealPage = async ({ params }: { params: Params }) => {
   );
 };
 
-export default EditInferredDealPage;
+export default EditManualDealPage;

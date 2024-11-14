@@ -1,6 +1,7 @@
 "use client";
 
 import RawDealCard from "@/components/RawDealCard";
+import DealCardSkeleton from "@/components/skeletons/DealCardSkeleton";
 import { Button } from "@/components/ui/button";
 import { fetchDocumentsWithPagination, SnapshotDeal } from "@/lib/firebase/db";
 import { useEffect, useState } from "react";
@@ -10,11 +11,13 @@ const FetchingRawDeals = () => {
   const [page, setPage] = useState(1);
   const [isNextAvailable, setIsNextAvailable] = useState(false);
   const [isPreviousAvailable, setIsPreviousAvailable] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    setLoading(true);
     const fetchData = async () => {
       const documents = await fetchDocumentsWithPagination("deals", 35);
-      console.log("fetchedDeals", documents);
+      setLoading(false);
       setData(documents);
       setIsNextAvailable(documents.length >= 3);
     };
@@ -22,15 +25,18 @@ const FetchingRawDeals = () => {
   }, []);
 
   const showNext = async (item: SnapshotDeal) => {
+    setLoading(true);
     if (data.length === 0) {
       alert("No more deals to show");
+      setLoading(false);
     } else {
       const nextItems = await fetchDocumentsWithPagination(
         "deals",
         35,
         "next",
-        item
+        item,
       );
+      setLoading(false);
       if (nextItems.length > 0) {
         setData(nextItems);
         setPage(page + 1);
@@ -41,12 +47,14 @@ const FetchingRawDeals = () => {
   };
 
   const showPrevious = async (item: SnapshotDeal) => {
+    setLoading(true);
     const previousItems = await fetchDocumentsWithPagination(
       "deals",
       35,
       "previous",
-      item
+      item,
     );
+    setLoading(false);
     if (previousItems.length > 0) {
       setData(previousItems);
       setPage(page - 1);
@@ -56,15 +64,28 @@ const FetchingRawDeals = () => {
   };
 
   return (
-    <div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {data.map((e) => {
-          return <RawDealCard key={e.id} deal={e} />;
-        })}
-      </div>
+    <div className="big-container">
+      {loading ? (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <DealCardSkeleton />
+          <DealCardSkeleton />
+          <DealCardSkeleton />
+          <DealCardSkeleton />
+          <DealCardSkeleton />
+          <DealCardSkeleton />
+          <DealCardSkeleton />
+          <DealCardSkeleton />
+        </div>
+      ) : (
+        <div className="blog-index">
+          {data.map((e) => {
+            return <RawDealCard key={e.id} deal={e} />;
+          })}
+        </div>
+      )}
 
       {/* Pagination controls */}
-      <div className="space-x-2 justify-end mt-4 w-full">
+      <div className="mt-4 w-full justify-end space-x-2">
         <Button
           onClick={() => {
             showPrevious(data[0] as SnapshotDeal);

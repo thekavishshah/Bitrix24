@@ -83,6 +83,8 @@ const InferredDealSpecificPage = async ({ params }: { params: Params }) => {
     asking_price,
     listing_code,
     state,
+    grossRevenue, 
+    inventory,
     category,
     status,
     main_content,
@@ -90,32 +92,9 @@ const InferredDealSpecificPage = async ({ params }: { params: Params }) => {
   } = fetchedDeal;
 
   return (
-    <section className="block-space big-container">
-      <div className="container py-4 mb-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          {/* Previous Page Button */}
-          <div className="w-full md:w-auto">
-            <PreviousPageButton />
-          </div>
-
-          {/* Actions: Edit, Visit Website, Publish */}
-          {/* <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 w-full md:w-auto">
-            <Button asChild className="w-full md:w-auto">
-              <Link href={`/inferred-deals/${uid}/edit`}>
-                <Edit className="mr-2 h-4 w-4" /> Edit Deal
-              </Link>
-            </Button>
-
-            {link && (
-              <Button asChild variant="outline" className="w-full md:w-auto">
-                <Link href={link}>
-                  <ExternalLink className="mr-2 h-4 w-4" />
-                  Visit Website
-                </Link>
-              </Button>
-            )}
-          </div> */}
-        </div>
+    <section className="block-space big-container relative">
+      <div className="absolute top-6 left-8">
+        <PreviousPageButton />
       </div>
 
       <div className="narrow-container mb-8 md:mb-10 lg:mb-12 ">
@@ -135,6 +114,22 @@ const InferredDealSpecificPage = async ({ params }: { params: Params }) => {
           make an informed decision, and feel free to screen the deal with our
           AI tool to get further insights.
         </p>
+        <div className="flex flex-col mt-4 md:flex-row md:items-center justify-around gap-4 w-full md:w-auto">
+          <Button asChild className="w-full md:w-auto">
+            <Link href={`/inferred-deals/${uid}/edit`}>
+              <Edit className="mr-2 h-4 w-4" /> Edit Deal
+            </Link>
+          </Button>
+
+          {link && (
+            <Button asChild variant="outline" className="w-full md:w-auto">
+              <Link href={link}>
+                <ExternalLink className="mr-2 h-4 w-4" />
+                Visit Website
+              </Link>
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 container">
@@ -227,7 +222,21 @@ const InferredDealSpecificPage = async ({ params }: { params: Params }) => {
                   <span className="ml-2">{category}</span>
                 </div>
               )}
+  {grossRevenue && (
+                <div className="flex items-center gap-2">
+                  <Tag className="mr-2 h-5 w-5" />
+                  <span className="font-medium">Gross Revenue:</span>
+                  <span className="ml-2">{grossRevenue}</span>
+                </div>
+              )}
 
+              {inventory && (
+                <div className="flex items-center gap-2">
+                  <Tag className="mr-2 h-5 w-5" />
+                  <span className="font-medium">Inventory:</span>
+                  <span className="ml-2">{inventory}</span>
+                </div>
+              )}
               {source && (
                 <div className="flex items-center gap-2">
                   <WebhookIcon className="mr-2 h-5 w-5" />

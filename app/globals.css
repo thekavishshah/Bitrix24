@@ -165,7 +165,7 @@ body {
 
 .blog-index {
   display: columns;
-  columns: 4;
+  columns: 3;
 }
 
 .blog-index > * {

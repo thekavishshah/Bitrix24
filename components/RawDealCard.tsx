@@ -9,6 +9,7 @@ import {
   Cross,
   DollarSignIcon,
   Edit,
+  Edit2,
   EyeIcon,
   Globe,
   Handshake,
@@ -29,6 +30,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import DeleteDealButton from "./Buttons/delete-deal-button";
 
 type RawDealCardProps = {
   deal: SnapshotDeal;
@@ -54,11 +56,11 @@ const RawDealCard = ({ deal }: RawDealCardProps) => {
   } = deal;
 
   return (
-    <Card className="relative  overflow-hidden transition-all duration-300 hover:shadow-lg">
+    <Card className="relative overflow-hidden transition-all duration-300 hover:shadow-lg">
       <CardHeader className="pb-2">
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between">
           <CardTitle className="text-xl font-bold">{title}</CardTitle>
-          <div className="flex gap-2 flex-col">
+          <div className="flex flex-col gap-2">
             <Button variant="outline" size="icon" asChild>
               <Link href={`/raw-deals/${id}/edit`}>
                 <Edit className="h-4 w-4" />
@@ -67,7 +69,7 @@ const RawDealCard = ({ deal }: RawDealCardProps) => {
             {link && (
               <Button className="w-full" size={"icon"} asChild>
                 <Link href={link}>
-                  <Globe className=" h-4 w-4" />
+                  <Globe className="h-4 w-4" />
                 </Link>
               </Button>
             )}
@@ -128,28 +130,28 @@ const RawDealCard = ({ deal }: RawDealCardProps) => {
             </div>
           )}
           {state && (
-            <div className="flex items-center ">
+            <div className="flex items-center">
               <MapPinIcon className="mr-2 h-4 w-4" />
               <span className="font-medium">State:</span>
               <span className="ml-2">{state}</span>
             </div>
           )}
           {location && (
-            <div className="flex items-center ">
+            <div className="flex items-center">
               <MapPinIcon className="mr-2 h-4 w-4" />
               <span className="font-medium">Location:</span>
               <span className="ml-2">{location}</span>
             </div>
           )}
           {cashFlow && (
-            <div className="flex items-center ">
+            <div className="flex items-center">
               <MdMoney className="mr-2 h-4 w-4" />
               <span className="font-medium">Cashflow:</span>
               <span className="ml-2">{cashFlow}</span>
             </div>
           )}
           {asking_price && (
-            <div className="flex items-center ">
+            <div className="flex items-center">
               <CreditCard className="mr-2 h-4 w-4" />
               <span className="font-medium">Asking Price:</span>
               <span className="ml-2">{asking_price}</span>
@@ -168,6 +170,11 @@ const RawDealCard = ({ deal }: RawDealCardProps) => {
             <EyeIcon className="mr-2 h-4 w-4" /> View Details
           </Link>
         </Button>
+        <DeleteDealButton
+          dealId={id}
+          dealCollection="deals"
+          classname="w-full"
+        />
       </CardFooter>
     </Card>
   );

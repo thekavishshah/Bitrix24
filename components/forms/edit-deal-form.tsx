@@ -27,8 +27,9 @@ import AddDealToFirebase from "@/app/actions/add-deal";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { useRouter } from "next/navigation";
+import EditDealFromFirebase from "@/app/actions/edit-deal";
 
-export const NewDealFormSchema = z.object({
+export const EditDealFormSchema = z.object({
   first_name: z.optional(z.string()),
   last_name: z.optional(z.string()),
   title: z
@@ -52,55 +53,91 @@ export const NewDealFormSchema = z.object({
 });
 
 // infer type of formSchema
-export type NewDealFormSchemaType = z.infer<typeof NewDealFormSchema>;
+export type EditDealFormSchemaType = z.infer<typeof EditDealFormSchema>;
 
-export default function CreateNewDealForm() {
+type EditDealFormProps = {
+  title: string;
+  first_name?: string;
+  last_name?: string;
+  direct_phone?: string;
+  work_phone?: string;
+  under_contract?: string;
+  revenue?: string;
+  link?: string;
+  asking_price?: string;
+  ebitda?: string;
+  inventory?: string;
+  grossRevenue?: string;
+  listing_code?: string;
+  state?: string;
+  status?: "Approved" | "Rejected";
+  category?: string;
+  main_content?: string;
+  explanation?: string;
+  id: string;
+  dealCollection: string;
+};
+
+const EditDealForm = ({
+  id,
+  title,
+  first_name,
+  last_name,
+  direct_phone,
+  work_phone,
+  under_contract,
+  revenue,
+  link,
+  asking_price,
+  listing_code,
+  state,
+  status,
+  category,
+  main_content,
+  ebitda,
+  grossRevenue,
+  inventory,
+  explanation,
+  dealCollection,
+}: EditDealFormProps) => {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const router = useRouter();
-  // ...
-  const form = useForm<NewDealFormSchemaType>({
-    resolver: zodResolver(NewDealFormSchema),
+
+  const form = useForm<EditDealFormSchemaType>({
+    resolver: zodResolver(EditDealFormSchema),
     defaultValues: {
-      first_name: "",
-      last_name: "",
-      direct_phone: "",
-      work_phone: "",
-      title: "",
-      under_contract: "",
-      revenue: "",
-      link: "",
-      ebitda: "",
-      grossRevenue: "",
-      inventory: "",
-      asking_price: "",
-      listing_code: "",
-      state: "",
-      status: "Pending",
-      category: "",
-      main_content: "",
-      explanation: "",
+      first_name: first_name || "",
+      last_name: last_name || "",
+      direct_phone: direct_phone || "",
+      work_phone: work_phone || "",
+      title,
+      under_contract: under_contract || "",
+      revenue: revenue || "",
+      link: link || "",
+      asking_price: asking_price || "",
+      listing_code: listing_code || "",
+      state: state || "",
+      status: status || "Pending",
+      category: category || "",
+      main_content: main_content || "",
+      explanation: explanation || "",
+      ebitda: ebitda || "",
+      grossRevenue: grossRevenue || "",
+      inventory: inventory || "",
     },
   });
 
   // 2. Define a submit handler.
-  function onSubmit(values: NewDealFormSchemaType) {
+  function onSubmit(values: EditDealFormSchemaType) {
     startTransition(async () => {
-      const response = await AddDealToFirebase(values);
+      console.log("values", values);
+      const response = await EditDealFromFirebase(dealCollection,values, id);
       if (response.type === "success") {
         toast({
-          title: "Deal saved successfully",
-          description: "Deal has been saved successfully",
-          action: (
-            <ToastAction
-              altText="View Deal"
-              onClick={() => {
-                router.push(`manual-deals/${response.documentId}`);
-              }}
-            >
-              View Deal
-            </ToastAction>
-          ),
+          title: `Deal Edit successfully`,
+          description: `Deal Edit successfully from the collection from ${dealCollection}`,
+      
         });
       }
 
@@ -113,9 +150,13 @@ export default function CreateNewDealForm() {
       }
     });
   }
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="grid grid-cols-2 gap-4"
+      >
         <FormField
           control={form.control}
           name="title"
@@ -342,40 +383,50 @@ export default function CreateNewDealForm() {
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="main_content"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Teaser</FormLabel>
-              <FormControl>
-                <Textarea placeholder="deal teaser....." {...field} rows={15} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="explanation"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Screening Explanation</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="screening explanation....."
-                  {...field}
-                  rows={15}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit" disabled={isPending}>
-          {isPending ? "Submitting" : "Submit"}
+        <div className="col-span-2">
+          <FormField
+            control={form.control}
+            name="main_content"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Teaser</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="deal teaser....."
+                    {...field}
+                    rows={15}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        <div className="col-span-2">
+          <FormField
+            control={form.control}
+            name="explanation"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Screening Explanation</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="screening explanation....."
+                    {...field}
+                    rows={15}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        <Button type="submit" className="w-fit" disabled={isPending}>
+          {isPending ? "Editing..." : "Edit"}
         </Button>
       </form>
     </Form>
   );
-}
+};
+
+export default EditDealForm;

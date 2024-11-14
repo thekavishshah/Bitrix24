@@ -1,7 +1,7 @@
 import EditDealForm from "@/components/forms/edit-deal-form";
 import PreviousPageButton from "@/components/PreviousPageButton";
 import { Card, CardContent } from "@/components/ui/card";
-import { fetchSpecificInferredDeal } from "@/lib/firebase/db";
+import { fetchSpecificDeal } from "@/lib/firebase/db";
 import { Metadata } from "next";
 import React from "react";
 
@@ -15,7 +15,7 @@ export async function generateMetadata({
   const { uid } = await params;
 
   try {
-    const fetchedDeal = await fetchSpecificInferredDeal(uid);
+    const fetchedDeal = await fetchSpecificDeal(uid);
     return {
       title: `Edit ${fetchedDeal?.title}` || "Dark Alpha Capital",
       description:
@@ -29,14 +29,14 @@ export async function generateMetadata({
   }
 }
 
-const EditInferredDealPage = async ({ params }: { params: Params }) => {
+const EditRawDealPage = async ({ params }: { params: Params }) => {
   const { uid } = await params;
 
-  const fetchedDeal = await fetchSpecificInferredDeal(uid);
+  const fetchedDeal = await fetchSpecificDeal(uid);
 
   if (!fetchedDeal) {
     return (
-      <section className="mt-10 text-center text-xl">Deal not found</section>
+      <section className="text-center mt-10 text-xl">Deal not found</section>
     );
   }
 
@@ -67,18 +67,18 @@ const EditInferredDealPage = async ({ params }: { params: Params }) => {
 
   return (
     <section className="block-space relative">
-      <div className="absolute left-8 top-6">
+      <div className="absolute top-6 left-8">
         <PreviousPageButton />
       </div>
       <div className="narrow-container mb-8 md:mb-10 lg:mb-12">
-        <h1 className="mb-4 text-center text-4xl font-bold text-gray-900">
+        <h1 className="text-4xl font-bold mb-4 text-center text-gray-900">
           Edit Deal: {title}
         </h1>
-        <p className="text-center text-lg leading-relaxed text-gray-600">
+        <p className="text-lg text-gray-600 text-center leading-relaxed">
           You are currently editing the details of the{" "}
           <strong>{category}</strong> deal titled <strong>{title}</strong>.
         </p>
-        <p className="text-center text-lg leading-relaxed text-gray-600">
+        <p className="text-lg text-gray-600 text-center leading-relaxed">
           Please ensure that all fields, such as revenue, asking price,
           location, and contract status, are updated accurately. Once
           you&apos;re done, click on{" "}
@@ -88,10 +88,10 @@ const EditInferredDealPage = async ({ params }: { params: Params }) => {
         </p>
       </div>
       <div className="big-container">
-        <Card className="transition-all duration-75 ease-in-out hover:shadow-lg">
+        <Card className="hover:shadow-lg transition-all duration-75 ease-in-out">
           <CardContent className="p-6">
             <EditDealForm
-              dealCollection="inferred-deals"
+              dealCollection="deals"
               title={title}
               first_name={first_name}
               last_name={last_name}
@@ -108,9 +108,9 @@ const EditInferredDealPage = async ({ params }: { params: Params }) => {
               explanation={explanation}
               id={id}
               ebitda={ebitda}
-              category={category}
               grossRevenue={grossRevenue}
               inventory={inventory}
+               category={category}
             />
           </CardContent>
         </Card>
@@ -119,4 +119,4 @@ const EditInferredDealPage = async ({ params }: { params: Params }) => {
   );
 };
 
-export default EditInferredDealPage;
+export default EditRawDealPage;

@@ -27,9 +27,12 @@ export type SnapshotDeal = {
   last_name?: string;
   direct_phone?: string;
   work_phone?: string;
-  ebitda?: number;
+  ebitda?: string;
 
   explanation?: string;
+
+  grossRevenue?: string;
+  inventory?: string;
 
   asking_price?: string; // e.g., "$15,500,000"
   category?: string; // e.g., "Pharmacy"

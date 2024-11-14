@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 const RawDealsPage = async () => {
   return (
-    <div className="block-space big-container">
+    <div className="block-space container">
       <h1 className="mb-4 text-center md:mb-6 lg:mb-8">Raw Deals</h1>
       <Suspense
         fallback={

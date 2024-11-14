@@ -65,7 +65,7 @@ const ManualDealSpecificPage = async ({ params }: { params: Params }) => {
 
   if (!fetchedDeal) {
     return (
-      <section className="text-center mt-10 text-xl">Deal not found</section>
+      <section className="mt-10 text-center text-xl">Deal not found</section>
     );
   }
 
@@ -82,6 +82,8 @@ const ManualDealSpecificPage = async ({ params }: { params: Params }) => {
     source,
     ebitda,
     link,
+    grossRevenue,
+    inventory,
     scraped_by,
     asking_price,
     listing_code,
@@ -93,43 +95,20 @@ const ManualDealSpecificPage = async ({ params }: { params: Params }) => {
   } = fetchedDeal;
 
   return (
-    <section className="block-space big-container">
-      <div className="container py-4 mb-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          {/* Previous Page Button */}
-          <div className="w-full md:w-auto">
-            <PreviousPageButton />
-          </div>
-
-          {/* Actions: Edit, Visit Website, Publish */}
-          {/* <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 w-full md:w-auto">
-            <Button asChild className="w-full md:w-auto">
-              <Link href={`/inferred-deals/${uid}/edit`}>
-                <Edit className="mr-2 h-4 w-4" /> Edit Deal
-              </Link>
-            </Button>
-
-            {link && (
-              <Button asChild variant="outline" className="w-full md:w-auto">
-                <Link href={link}>
-                  <ExternalLink className="mr-2 h-4 w-4" />
-                  Visit Website
-                </Link>
-              </Button>
-            )}
-          </div> */}
-        </div>
+    <section className="block-space big-container relative">
+      <div className="absolute left-8 top-6">
+        <PreviousPageButton />
       </div>
 
-      <div className="narrow-container mb-8 md:mb-10 lg:mb-12 ">
+      <div className="narrow-container mb-8 md:mb-10 lg:mb-12">
         <div className="mx-auto text-center">
           <Badge className="mb-4">Manual Deal</Badge>
         </div>
-        <h1 className="text-4xl font-bold mb-4 text-center text-gray-900">
+        <h1 className="mb-4 text-center text-4xl font-bold text-gray-900">
           Deal Overview: {title}
         </h1>
 
-        <p className="text-lg text-gray-600 text-center leading-relaxed text-pretty">
+        <p className="text-pretty text-center text-lg leading-relaxed text-gray-600">
           You are viewing detailed information about the {category} deal titled{" "}
           <strong>{title}</strong>. This deal is currently{" "}
           <span className="font-semibold">{status || "unchecked"}</span>. Below,
@@ -138,10 +117,26 @@ const ManualDealSpecificPage = async ({ params }: { params: Params }) => {
           make an informed decision, and feel free to screen the deal with our
           AI tool to get further insights.
         </p>
+        <div className="mt-4 flex w-full flex-col justify-around gap-4 md:w-auto md:flex-row md:items-center">
+          <Button asChild className="w-full md:w-auto">
+            <Link href={`/manual-deals/${uid}/edit`}>
+              <Edit className="mr-2 h-4 w-4" /> Edit Deal
+            </Link>
+          </Button>
+
+          {link && (
+            <Button asChild variant="outline" className="w-full md:w-auto">
+              <Link href={link}>
+                <ExternalLink className="mr-2 h-4 w-4" />
+                Visit Website
+              </Link>
+            </Button>
+          )}
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 container">
-        <Card className="relative overflow-hidden  bg-muted transition-all duration-300 hover:shadow-lg">
+      <div className="container grid grid-cols-1 gap-4 md:grid-cols-2">
+        <Card className="relative overflow-hidden bg-muted transition-all duration-300 hover:shadow-lg">
           <CardHeader className="pb-2">
             <CardTitle className="text-2xl font-bold">{title}</CardTitle>
           </CardHeader>
@@ -151,8 +146,7 @@ const ManualDealSpecificPage = async ({ params }: { params: Params }) => {
               <div className="flex items-center gap-2">
                 {status === "Approved" ? (
                   <div>
-                    <Check className="mr-2 h-5 w-5 text-green-500" />
-                    <Badge variant="outline">Approved</Badge>
+                    <Badge className="bg-green-800">Approved</Badge>
                   </div>
                 ) : status === "Rejected" ? (
                   <div>
@@ -231,6 +225,22 @@ const ManualDealSpecificPage = async ({ params }: { params: Params }) => {
                 </div>
               )}
 
+              {grossRevenue && (
+                <div className="flex items-center gap-2">
+                  <Tag className="mr-2 h-5 w-5" />
+                  <span className="font-medium">Gross Revenue:</span>
+                  <span className="ml-2">{grossRevenue}</span>
+                </div>
+              )}
+
+              {inventory && (
+                <div className="flex items-center gap-2">
+                  <Tag className="mr-2 h-5 w-5" />
+                  <span className="font-medium">Inventory:</span>
+                  <span className="ml-2">{inventory}</span>
+                </div>
+              )}
+
               {source && (
                 <div className="flex items-center gap-2">
                   <WebhookIcon className="mr-2 h-5 w-5" />
@@ -293,7 +303,7 @@ const ManualDealSpecificPage = async ({ params }: { params: Params }) => {
 
           <CardFooter className="flex flex-col gap-4"></CardFooter>
         </Card>
-        <Card className="relative  bg-muted overflow-hidden transition-all duration-300 hover:shadow-lg h-fit">
+        <Card className="relative h-fit overflow-hidden bg-muted transition-all duration-300 hover:shadow-lg">
           <CardHeader className="pb-2">
             <CardTitle className="text-2xl font-bold text-gray-900">
               AI Reasoning
@@ -323,7 +333,7 @@ const ManualDealSpecificPage = async ({ params }: { params: Params }) => {
                   <h3 className="text-lg font-semibold text-gray-600">
                     No explanation available at the moment.
                   </h3>
-                  <span className=" text-gray-500">
+                  <span className="text-gray-500">
                     You can provide additional details or review the deal for
                     further information.
                   </span>

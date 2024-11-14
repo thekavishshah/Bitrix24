@@ -4,6 +4,13 @@ import { Bot } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import CreateNewDealForm from "@/components/forms/new-deal-form";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Add New Deal",
+  description:
+    "Add a new Deal to the Database by bulk importing or adding it manually",
+};
 
 const NewDealPage = async () => {
   return (
@@ -14,19 +21,19 @@ const NewDealPage = async () => {
           Add a new Deal to the Database by bulk importing or adding it manually
         </p>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6  lg:gap-8">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:gap-8">
         <div className="">
           <div className="space-y-4 lg:sticky lg:top-24">
-            <div className="p-6 bg-white shadow-lg rounded-lg border border-gray-200 h-fit">
-              <h2 className="text-xl font-semibold mb-4 text-center">
+            <div className="h-fit rounded-lg border border-gray-200 bg-white p-6 shadow-lg">
+              <h2 className="mb-4 text-center text-xl font-semibold">
                 Bulk Import Deals
               </h2>
-              <p className="text-gray-600 mb-2 text-center">
+              <p className="mb-2 text-center text-gray-600">
                 Quickly import multiple deals at once by uploading a file. Save
                 time and effort with bulk import functionality.
               </p>
 
-              <p className="text-red-600 mb-6 text-center">
+              <p className="mb-6 text-center text-red-600">
                 keep in mind that the excel sheet should be in a specific format
                 for bulk upload
               </p>
@@ -34,24 +41,24 @@ const NewDealPage = async () => {
               <BulkUploadDealsDialog />
             </div> */}
             </div>
-            <div className="p-6 bg-white shadow-lg rounded-lg border border-gray-200 h-fit">
-              <h2 className="text-xl font-semibold mb-4 text-center">
+            <div className="h-fit rounded-lg border border-gray-200 bg-white p-6 shadow-lg">
+              <h2 className="mb-4 text-center text-xl font-semibold">
                 Infer Deal
               </h2>
-              <p className="text-gray-600 mb-2 text-center">
+              <p className="mb-2 text-center text-gray-600">
                 Enter the description of a deal and use AI to generate the
                 required format for the deal, save it to the database and then
                 scrape it
               </p>
 
-              <p className="text-red-600 mb-6 text-center">
+              <p className="mb-6 text-center text-red-600">
                 Note:- Double check the output given by AI and save it
                 accordingly
               </p>
               <div className="flex justify-center">
                 <Button className="w-full" asChild>
                   <Link href="/infer">
-                    <Bot className="h-4 w-4 mr-2" /> Infer Deal
+                    <Bot className="mr-2 h-4 w-4" /> Infer Deal
                   </Link>
                 </Button>
               </div>
