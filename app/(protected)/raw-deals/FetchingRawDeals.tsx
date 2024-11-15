@@ -13,6 +13,7 @@ const FetchingRawDeals = () => {
   const [isPreviousAvailable, setIsPreviousAvailable] = useState(false);
   const [loading, setLoading] = useState(false);
 
+
   useEffect(() => {
     setLoading(true);
     const fetchData = async () => {
