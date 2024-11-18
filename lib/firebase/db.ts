@@ -16,6 +16,15 @@ import { getDocs, query, limit } from "firebase/firestore";
 import { doc, deleteDoc } from "firebase/firestore";
 import { db } from "./init";
 
+export type Questionnaire = {
+  id: string;
+  title: string;
+  purpose: string;
+  version: string;
+  author: string;
+  url: string;
+};
+
 export type SnapshotDeal = {
   id: string;
   source: string;
@@ -73,7 +82,7 @@ export async function fetchDocumentsWithPagination(
   collectionName: string,
   limitCount = 15,
   order: "next" | "previous" = "next",
-  lastVisibleDoc?: any
+  lastVisibleDoc?: any,
 ): Promise<SnapshotDeal[]> {
   try {
     const collectionRef = collection(db, collectionName);
@@ -85,20 +94,20 @@ export async function fetchDocumentsWithPagination(
         collectionRef,
         orderBy("created_at", "desc"),
         startAfter(lastVisibleDoc.created_at),
-        limit(limitCount)
+        limit(limitCount),
       );
     } else if (order === "previous" && lastVisibleDoc) {
       q = query(
         collectionRef,
         orderBy("created_at", "desc"),
         endBefore(lastVisibleDoc.created_at),
-        limitToLast(limitCount)
+        limitToLast(limitCount),
       );
     } else {
       q = query(
         collectionRef,
         orderBy("created_at", "desc"),
-        limit(limitCount)
+        limit(limitCount),
       );
     }
 
@@ -173,7 +182,7 @@ export const deleteDealFromDatabase = async (dealId: string) => {
 
 export const editDealInDatabase = async (
   dealId: string,
-  updatedDeal: any
+  updatedDeal: any,
 ): Promise<void> => {
   try {
     // Reference to the specific deal document
@@ -203,7 +212,7 @@ export const updateDealStatusFirebase = async (
   dealId: string, // Must provide dealId to update the document
   status: "Approved" | "Rejected",
   explanation: string,
-  additionalData: any = {}
+  additionalData: any = {},
 ): Promise<void> => {
   try {
     // Check if the deal exists
@@ -229,7 +238,7 @@ export const updateDealStatusFirebase = async (
 };
 
 export async function fetchSpecificDeal(
-  dealId: string
+  dealId: string,
 ): Promise<SnapshotDeal | null> {
   try {
     const dealRef = doc(db, "deals", dealId); // Replace "deals" with your collection name
@@ -251,7 +260,7 @@ export async function fetchSpecificDeal(
 }
 
 export async function fetchSpecificInferredDeal(
-  dealId: string
+  dealId: string,
 ): Promise<SnapshotDeal | null> {
   try {
     const dealRef = doc(db, "inferred-deals", dealId); // Replace "deals" with your collection name
@@ -273,7 +282,7 @@ export async function fetchSpecificInferredDeal(
 }
 
 export async function fetchSpecificManualDeal(
-  dealId: string
+  dealId: string,
 ): Promise<SnapshotDeal | null> {
   try {
     const dealRef = doc(db, "manual-deals", dealId); // Replace "deals" with your collection name
@@ -291,5 +300,26 @@ export async function fetchSpecificManualDeal(
   } catch (error) {
     console.error("Error fetching the deal:", error);
     throw error;
+  }
+}
+
+export async function fetchQuestionnaires(): Promise<Questionnaire[]> {
+  try {
+    const collectionRef = collection(db, "questionnaires");
+    const q = query(collectionRef, orderBy("created_at", "desc"));
+    const querySnapshot = await getDocs(q);
+
+    const documents: Questionnaire[] = [];
+    querySnapshot.forEach((doc) => {
+      documents.push({
+        id: doc.id,
+        ...doc.data(),
+      } as Questionnaire);
+    });
+
+    return documents;
+  } catch (error) {
+    console.error("Error fetching questionnaires:", error);
+    throw error; // Propagate the error to be handled by the caller
   }
 }

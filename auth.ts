@@ -3,6 +3,8 @@ import Google from "next-auth/providers/google";
 
 const allowedEmails = [
   "rg5353070@gmail.com",
+  "destiny@darkalphacapital.com",
+  "daigbe@darkalphacapital.com",
   "daigbe@gmail.com",
   "ayan@darkalphacapital.com",
 ];

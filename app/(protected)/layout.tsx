@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import Header from "@/components/Header";
 import { Toaster } from "@/components/ui/toaster";
 import { auth } from "@/auth";
+import MenuDialog from "@/components/Dialogs/menu-dialog";
 
 export const metadata: Metadata = {
   title: "Dark Alpha Capital Deal Sourcing Organization",
@@ -21,8 +22,9 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className={cn(GeistSans.variable)}>
-      <body className={` antialiased`}>
+      <body className={`antialiased`}>
         <main>
+          <MenuDialog />
           <Header session={session} />
 
           {children}
