@@ -1,67 +1,164 @@
 "use client";
 
+import React from "react";
+import Link from "next/link";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { FiUpload, FiHelpCircle } from "react-icons/fi";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import {
+  Box,
+  FileText,
+  BarChart2,
+  PlusCircle,
+  User,
+  LogIn,
+  FileQuestion,
+  FileTerminal,
+  Shield,
+  ExternalLink,
+  Hand,
+  SendHorizonal,
+  Forward,
+} from "lucide-react";
 
-import React from "react";
-import { Button } from "../ui/button";
-import { Box } from "lucide-react";
-import Link from "next/link";
-
-const secondaryNav = [
+const menuItems = [
   {
-    navLink: "screening-baseline",
-    navTitle: "Screening Baseline",
-    icon: FiUpload, // Icon for Screening Baseline
+    category: "Deals",
+    items: [
+      { navLink: "/raw-deals", navTitle: "Raw Deals", icon: FileText },
+      { navLink: "/new-deal", navTitle: "Create New Deal", icon: PlusCircle },
+      { navLink: "/manual-deals", navTitle: "Manual Deals", icon: Hand },
+      {
+        navLink: "/published-deals",
+        navTitle: "Published Deals",
+        icon: BarChart2,
+      },
+      {
+        navLink: "/inferred-deals",
+        navTitle: "Inferred Deals",
+        icon: FileText,
+      },
+      { navLink: "/infer", navTitle: "Infer New Deal", icon: PlusCircle },
+    ],
   },
   {
-    navLink: "screening-questions",
-    navTitle: "Screening Questions",
-    icon: FiHelpCircle, // Icon for Screening Questions
+    catgeory: "Bitrix",
+    items: [
+      {
+        navLink: "/publish",
+        navTitle: "Publish to Bitrix",
+        icon: SendHorizonal,
+        external: false,
+      },
+      {
+        navLink: "/published-deals",
+        navTitle: "Published Deals",
+        icon: Forward,
+        external: false,
+      },
+    ],
+  },
+  {
+    category: "Questionnaires",
+    items: [
+      {
+        navLink: "/questionnaires",
+        navTitle: "View Questionnaires",
+        icon: LogIn,
+      },
+      { navLink: "/profile", navTitle: "Upload Questionnaire", icon: User },
+    ],
+  },
+  {
+    category: "User",
+    items: [
+      { navLink: "/login", navTitle: "Login", icon: LogIn },
+      { navLink: "/profile", navTitle: "Profile", icon: User },
+    ],
+  },
+  {
+    category: "Information",
+    items: [
+      {
+        navLink: "/getting-started",
+        navTitle: "Getting Started",
+        icon: FileQuestion,
+      },
+      {
+        navLink: "/terms-of-service",
+        navTitle: "Terms of Service",
+        icon: FileTerminal,
+      },
+      { navLink: "/privacy-policy", navTitle: "Privacy Policy", icon: Shield },
+    ],
+  },
+  {
+    category: "External Links",
+    items: [
+      {
+        navLink: "https://bitrix24.com",
+        navTitle: "Bitrix24",
+        icon: ExternalLink,
+        external: true,
+      },
+      {
+        navLink: "/publish-to-bitrix",
+        navTitle: "Publish New Deal to Bitrix",
+        icon: ExternalLink,
+      },
+    ],
   },
 ];
 
-const MenuDialog = () => {
+export default function MenuDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button
-          variant={"ghost"}
-          className="fixed bottom-12 right-12 z-50 rounded-full bg-gray-100 p-3 shadow-lg transition duration-200 hover:bg-gray-200 hover:shadow-xl"
+          variant="secondary"
+          size="icon"
+          className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full shadow-lg transition-all hover:shadow-xl"
         >
-          <Box />
+          <Box className="h-6 w-6" />
+          <span className="sr-only">Open menu</span>
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Quick Navigation</DialogTitle>
-          <DialogDescription>
-            Quickly Navigate among secondary routes
-          </DialogDescription>
+          <DialogTitle className="text-2xl font-bold">Menu</DialogTitle>
         </DialogHeader>
-
-        <div className="space-y-2">
-          {secondaryNav.map((nav, index) => (
-            <Link
-              key={index}
-              href={`/${nav.navLink}`}
-              className="flex w-full items-center rounded-lg p-3 text-gray-700 shadow-sm transition duration-300 ease-in-out hover:bg-gray-100 hover:text-gray-900"
-            >
-              <nav.icon className="mr-3 h-5 w-5 text-gray-500 transition duration-300 hover:text-gray-700" />
-              <span className="font-medium">{nav.navTitle}</span>
-            </Link>
+        <ScrollArea className="h-[70vh] pr-4">
+          {menuItems.map((category, index) => (
+            <div key={index} className="mb-6">
+              <h3 className="mb-2 text-lg font-semibold text-muted-foreground">
+                {category.category}
+              </h3>
+              <div className="space-y-2">
+                {category.items.map((item, itemIndex) => (
+                  <Link
+                    key={itemIndex}
+                    href={item.navLink}
+                    className="flex items-center rounded-lg p-3 text-sm transition-colors hover:bg-muted"
+                    target={item.external ? "_blank" : undefined}
+                    rel={item.external ? "noopener noreferrer" : undefined}
+                  >
+                    <item.icon className="mr-3 h-5 w-5 text-primary" />
+                    <span>{item.navTitle}</span>
+                  </Link>
+                ))}
+              </div>
+              {index < menuItems.length - 1 && <Separator className="mt-4" />}
+            </div>
           ))}
-        </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
-};
-
-export default MenuDialog;
+}

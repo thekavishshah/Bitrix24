@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { MdMenu, MdClose } from "react-icons/md";
 import {
@@ -43,12 +43,12 @@ const Header = ({ classname, session }: HeaderProps) => {
     <>
       <header
         className={clsx(
-          " px-2 md:px-4 lg:px-12 py-2 border-b sticky top-0 z-50 bg-background",
-          classname
+          "sticky top-0 z-50 border-b bg-background px-2 py-2 md:px-4 lg:px-12",
+          classname,
         )}
       >
         <nav aria-label="Main-navigation">
-          <ul className="flex flex-col  md:m-4 md:flex-row md:items-center justify-between md:rounded-xl">
+          <ul className="flex flex-col justify-between md:m-4 md:flex-row md:items-center md:rounded-xl">
             <div className="flex items-center justify-between">
               <NameLogo />
               <button
@@ -61,13 +61,13 @@ const Header = ({ classname, session }: HeaderProps) => {
             </div>
             <div
               className={clsx(
-                "fixed bottom-0 left-0 right-0 top-0 z-50 flex flex-col items-end gap-4 bg-black text-white pr-4 pt-14  transition-transform duration-300 ease-in-out md:hidden",
-                isOpen ? "translate-x-0" : "translate-x-[100%]"
+                "fixed bottom-0 left-0 right-0 top-0 z-50 flex flex-col items-end gap-4 bg-black pr-4 pt-14 text-white transition-transform duration-300 ease-in-out md:hidden",
+                isOpen ? "translate-x-0" : "translate-x-[100%]",
               )}
             >
               <button
                 aria-label="Close menu"
-                className="fixed right-4 top-3 block p-2 text-2xl text-white md:hidden "
+                className="fixed right-4 top-3 block p-2 text-2xl text-white md:hidden"
                 onClick={() => setIsOpen(false)}
               >
                 <MdClose />
@@ -82,7 +82,7 @@ const Header = ({ classname, session }: HeaderProps) => {
                     }}
                     className={clsx(
                       "",
-                      pathname === item.navlink ? "underline" : ""
+                      pathname === item.navlink ? "underline" : "",
                     )}
                   >
                     {item.navlabel}
@@ -107,7 +107,7 @@ function NameLogo() {
       <Link
         href="/"
         aria-label="Home page"
-        className="text-3xl md:text-4xl font-bold text-mainC"
+        className="text-mainC text-3xl font-bold md:text-4xl"
       >
         Deal Sourcing
       </Link>
@@ -125,10 +125,10 @@ function DesktopMenu() {
             href={item.navlink}
             key={index}
             className={clsx(
-              "font-bold hover:underline-offset-8 hover:text-mainC hover:underline  hover:decoration-4 hover:decoration-mainC transition",
+              "hover:text-mainC hover:decoration-mainC font-bold transition hover:underline hover:decoration-4 hover:underline-offset-8",
               pathname === item.navlink
-                ? "text-mainC underline-offset-8 underline decoration-4"
-                : ""
+                ? "text-mainC underline decoration-4 underline-offset-8"
+                : "",
             )}
           >
             {item.navlabel}
@@ -148,6 +148,7 @@ function AuthDialogNavs() {
 }
 
 function ProfileMenu({ session }: { session: Session }) {
+  const router = useRouter();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="flex items-center gap-2">
@@ -158,11 +159,18 @@ function ProfileMenu({ session }: { session: Session }) {
           />
           <AvatarFallback>CN</AvatarFallback>
         </Avatar>
-        <span className="flex items-center font-medium text-baseC">
+        <span className="text-baseC flex items-center font-medium">
           Account <ChevronDown />
         </span>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
+        <DropdownMenuItem
+          onClick={() => {
+            router.push(`/profile/${session.user?.id}`);
+          }}
+        >
+          Profile
+        </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => {
             signOut();
