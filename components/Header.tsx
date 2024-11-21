@@ -20,6 +20,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Session } from "next-auth";
+import { ModeToggle } from "./mode-toggle";
 
 type HeaderProps = {
   session: Session | null;
@@ -91,6 +92,7 @@ const Header = ({ classname, session }: HeaderProps) => {
               })}
             </div>
             <DesktopMenu />
+            {/* <ModeToggle /> */}
             {session ? <ProfileMenu session={session} /> : <AuthDialogNavs />}
           </ul>
         </nav>

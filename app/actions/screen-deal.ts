@@ -18,6 +18,8 @@ export async function screenDeal(
   dealInformation: string,
   values: z.infer<typeof ScreenDealFormSchema>,
 ) {
+  "use server";
+
   let filePath;
 
   if (values.type === "one") {
@@ -32,7 +34,7 @@ export async function screenDeal(
   const fileContent = await fs.readFile(filePath, "utf-8");
 
   const { text, finishReason, usage } = await generateText({
-    model: openai("gpt-4o"),
+    model: openai("o1-preview"),
     prompt: `I want you to screen the deal:${dealInformation} against the foloowing questionaire:${fileContent} and evaludate whether this deal is suitable for our company or not.`,
   });
 

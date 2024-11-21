@@ -73,7 +73,11 @@ const menuItems = [
         navTitle: "View Questionnaires",
         icon: LogIn,
       },
-      { navLink: "/profile", navTitle: "Upload Questionnaire", icon: User },
+      {
+        navLink: "/screening-baseline",
+        navTitle: "Upload Questionnaire",
+        icon: User,
+      },
     ],
   },
   {

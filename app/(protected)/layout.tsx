@@ -7,6 +7,7 @@ import Header from "@/components/Header";
 import { Toaster } from "@/components/ui/toaster";
 import { auth } from "@/auth";
 import MenuDialog from "@/components/Dialogs/menu-dialog";
+import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
   title: "Dark Alpha Capital Deal Sourcing Organization",

@@ -12,22 +12,20 @@ export const metadata: Metadata = {
 const QuestionnairePage = async () => {
   const dealScreeningQuestionnaires = await fetchQuestionnaires();
   return (
-    <div>
-      <div className="space-y-4">
-        {dealScreeningQuestionnaires.map(
-          ({ title, version, purpose, author, url, id }, index) => (
-            <QuestionnaireCard
-              key={index}
-              title={title}
-              purpose={purpose}
-              version={version}
-              url={url}
-              author={author}
-            />
-          ),
-        )}
-      </div>
-    </div>
+    <section className="big-container block-space grid grid-cols-1 gap-4 md:grid-cols-2">
+      {dealScreeningQuestionnaires.map(
+        ({ title, version, purpose, author, url, id }, index) => (
+          <QuestionnaireCard
+            key={index}
+            title={title}
+            purpose={purpose}
+            version={version}
+            url={url}
+            author={author}
+          />
+        ),
+      )}
+    </section>
   );
 };
 

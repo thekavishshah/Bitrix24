@@ -19,7 +19,7 @@ interface QuestionnaireInfo {
 
 export default function QuestionnaireCard(info: QuestionnaireInfo) {
   return (
-    <Card className="mx-auto w-full max-w-sm">
+    <Card className="mx-auto w-full">
       <CardHeader>
         <CardTitle className="text-xl font-bold">{info.title}</CardTitle>
         <div className="flex items-center justify-between text-sm text-muted-foreground">

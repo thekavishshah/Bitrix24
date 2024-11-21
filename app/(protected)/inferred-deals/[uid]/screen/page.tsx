@@ -64,7 +64,6 @@ const InferredDealScreenPage = async ({ params }: { params: Params }) => {
   } = fetchedDeal;
   return (
     <section className="block-space big-container">
-      <h2 className="">{title}</h2>
       <h2 className="mb-4">Screen this Deal</h2>
       <ScreenDealComponent
         dealCollection="inferred-deals"
