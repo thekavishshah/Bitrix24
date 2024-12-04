@@ -37,12 +37,10 @@ import AIReasoningSkeleton from "@/components/skeletons/AIReasoningSkeleton";
 
 type Params = { uid: string };
 
-export async function generateMetadata({
-  params,
-}: {
+export async function generateMetadata(props: {
   params: Params;
 }): Promise<Metadata> {
-  const { uid } = await params;
+  const { uid } = await props.params;
 
   try {
     const fetchedDeal = await prismaDB.deal.findUnique({
@@ -63,12 +61,10 @@ export async function generateMetadata({
   }
 }
 
-export default async function ManualDealSpecificPage({
-  params,
-}: {
+export default async function ManualDealSpecificPage(props: {
   params: Params;
 }) {
-  const { uid } = await params;
+  const { uid } = await props.params;
   const fetchedDeal = await prismaDB.deal.findUnique({
     where: {
       id: uid,
@@ -113,78 +109,6 @@ export default async function ManualDealSpecificPage({
     grossRevenue,
     dealType,
   } = fetchedDeal;
-
-  // Dummy AI reasonings
-  const aiReasonings = [
-    {
-      title: "Financial Analysis",
-      explanation:
-        "The company's financial metrics show strong potential. With an EBITDA of $" +
-        ebitda +
-        " and a revenue of $" +
-        revenue +
-        ", the business demonstrates a healthy profit margin. The asking price of $" +
-        askingPrice +
-        " seems reasonable given the financial performance.\n\nHowever, it's important to note that the EBITDA margin of " +
-        ebitdaMargin +
-        "% is slightly below industry average. This could indicate potential areas for operational improvement or cost-cutting measures that could increase profitability under new management.",
-      sentiment: "positive",
-      date: "2023-06-15",
-    },
-    {
-      title: "Market Position",
-      explanation:
-        "Operating in the " +
-        industry +
-        " industry, this company has established a significant market presence. The industry has shown steady growth over the past few years, and this trend is expected to continue.\n\nThe company's location in " +
-        companyLocation +
-        " provides access to a skilled workforce and a robust business ecosystem. However, it's crucial to assess the local competition and market saturation to ensure continued growth potential.",
-      sentiment: "neutral",
-      date: "2023-06-16",
-    },
-    {
-      title: "Growth Opportunities",
-      explanation:
-        "There appear to be several avenues for potential growth:\n\n1. Expansion into new geographic markets\n2. Development of new product lines or services\n3. Implementation of more efficient operational processes\n4. Exploration of strategic partnerships or acquisitions\n\nHowever, each of these opportunities would require careful planning and execution. It's recommended to conduct a thorough SWOT analysis before pursuing any major growth initiatives.",
-      sentiment: "positive",
-      date: "2023-06-17",
-    },
-    {
-      title: "Risk Assessment",
-      explanation:
-        "While the company shows promise, there are several risk factors to consider:\n\n1. Industry volatility: The " +
-        industry +
-        " sector can be subject to rapid changes and disruptions.\n2. Customer concentration: It's crucial to assess whether the company relies heavily on a small number of key clients.\n3. Regulatory environment: Changes in regulations could impact operations and profitability.\n4. Technology risks: Ensure the company's technology stack is up-to-date and competitive.\n\nA more in-depth due diligence process is recommended to fully understand and mitigate these potential risks.",
-      sentiment: "negative",
-      date: "2023-06-18",
-    },
-  ];
-
-  // Dummy SIMs data
-  const sims = [
-    {
-      id: "sim1",
-      title: "Initial Market Analysis",
-      description: "Comprehensive market research and competitor analysis.",
-      date: "2023-06-20",
-      status: "Completed",
-    },
-    {
-      id: "sim2",
-      title: "Financial Due Diligence",
-      description: "In-depth review of financial statements and projections.",
-      date: "2023-06-25",
-      status: "In Progress",
-    },
-    {
-      id: "sim3",
-      title: "Legal Assessment",
-      description:
-        "Review of contracts, intellectual property, and legal risks.",
-      date: "2023-07-01",
-      status: "Pending",
-    },
-  ];
 
   return (
     <section className="container mx-auto px-4 py-8">

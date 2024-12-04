@@ -8,12 +8,10 @@ import React from "react";
 
 type Params = Promise<{ uid: string }>;
 
-export async function generateMetadata({
-  params,
-}: {
+export async function generateMetadata(props: {
   params: Params;
 }): Promise<Metadata> {
-  const { uid } = await params;
+  const { uid } = await props.params;
 
   try {
     const fetchedDeal = await prismaDB.deal.findUnique({
@@ -35,8 +33,8 @@ export async function generateMetadata({
   }
 }
 
-const EditInferredDealPage = async ({ params }: { params: Params }) => {
-  const { uid } = await params;
+const EditInferredDealPage = async (props: { params: Params }) => {
+  const { uid } = await props.params;
 
   const fetchedDeal = await prismaDB.deal.findUnique({
     where: {

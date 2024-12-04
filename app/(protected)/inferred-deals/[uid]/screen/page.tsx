@@ -3,17 +3,16 @@ import {
   fetchQuestionnaires,
   fetchSpecificInferredDeal,
 } from "@/lib/firebase/db";
+import prismaDB from "@/lib/prisma";
 import { Metadata } from "next";
 import React from "react";
 
 type Params = Promise<{ uid: string }>;
 
-export async function generateMetadata({
-  params,
-}: {
+export async function generateMetadata(props: {
   params: Params;
 }): Promise<Metadata> {
-  const { uid } = await params;
+  const { uid } = await props.params;
 
   try {
     const fetchedDeal = await fetchSpecificInferredDeal(uid);
@@ -30,10 +29,14 @@ export async function generateMetadata({
   }
 }
 
-const InferredDealScreenPage = async ({ params }: { params: Params }) => {
-  const { uid } = await params;
-  const questionnaires = await fetchQuestionnaires();
-  const fetchedDeal = await fetchSpecificInferredDeal(uid);
+const InferredDealScreenPage = async (props: { params: Params }) => {
+  const { uid } = await props.params;
+
+  const fetchedDeal = await prismaDB.deal.findUnique({
+    where: {
+      id: uid,
+    },
+  });
 
   if (!fetchedDeal) {
     return (
@@ -43,57 +46,27 @@ const InferredDealScreenPage = async ({ params }: { params: Params }) => {
 
   const {
     id,
-    first_name,
-    last_name,
-    direct_phone,
-    work_phone,
-    title,
-    cashFlow,
-    under_contract,
+    firstName,
+    lastName,
+    workPhone,
     revenue,
-    source,
     ebitda,
-    link,
-    scraped_by,
-    asking_price,
-    listing_code,
-    state,
-    category,
-    status,
-    main_content,
-    explanation,
+    title,
+    sourceWebsite,
+    brokerage,
+    dealCaption,
+    companyLocation,
+    industry,
+    ebitdaMargin,
+    askingPrice,
     grossRevenue,
-    inventory,
+    dealType,
   } = fetchedDeal;
-
-  console.log("questionnaires", questionnaires);
 
   return (
     <section className="block-space big-container">
       <h2 className="mb-4">Screen this Deal</h2>
-      <ScreenDealComponent
-        dealCollection="inferred-deals"
-        title={title}
-        first_name={first_name}
-        last_name={last_name}
-        direct_phone={direct_phone}
-        work_phone={work_phone}
-        under_contract={under_contract}
-        revenue={revenue}
-        link={link}
-        asking_price={asking_price}
-        listing_code={listing_code}
-        state={state}
-        status={status}
-        main_content={main_content}
-        explanation={explanation}
-        id={id}
-        ebitda={ebitda}
-        category={category}
-        grossRevenue={grossRevenue}
-        inventory={inventory}
-        questionnairesData={JSON.stringify(questionnaires)}
-      />
+      <ScreenDealComponent dealId={uid} dealType={dealType} />
     </section>
   );
 };
