@@ -35,7 +35,7 @@ import SimItemSkeleton from "@/components/skeletons/SimItemSkeleton";
 import FetchDealAIScreenings from "@/components/FetchDealAIScreenings";
 import AIReasoningSkeleton from "@/components/skeletons/AIReasoningSkeleton";
 
-type Params = { uid: string };
+type Params = Promise<{ uid: string }>;
 
 export async function generateMetadata(props: {
   params: Params;
