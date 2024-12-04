@@ -42,7 +42,7 @@ export async function generateMetadata({
 }: {
   params: Params;
 }): Promise<Metadata> {
-  const { uid } = params;
+  const { uid } = await params;
 
   try {
     const fetchedDeal = await prismaDB.deal.findUnique({
