@@ -28,78 +28,57 @@ import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { useRouter } from "next/navigation";
 import EditDealFromFirebase from "@/app/actions/edit-deal";
+import { Deal } from "@prisma/client";
 
 export const EditDealFormSchema = z.object({
   first_name: z.optional(z.string()),
   last_name: z.optional(z.string()),
+  email: z.optional(z.string()),
+  linkedinurl: z.optional(z.string()),
+  deal_caption: z
+    .string()
+    .min(5, { message: "Title should be at least 5 characters long" }),
   title: z
     .string()
     .min(5, { message: "Title should be at least 5 characters long" }),
-  direct_phone: z.optional(z.string()),
   work_phone: z.optional(z.string()),
-  under_contract: z.optional(z.string()),
-  revenue: z.optional(z.string()),
-  ebitda: z.optional(z.string()),
-  grossRevenue: z.optional(z.string()),
-  inventory: z.optional(z.string()),
-  status: z.enum(["Approved", "Rejected", "Pending"]),
-  link: z.optional(z.string()),
-  asking_price: z.optional(z.string()),
-  listing_code: z.optional(z.string()),
-  state: z.optional(z.string()),
-  category: z.optional(z.string()),
-  main_content: z.optional(z.string()),
-  explanation: z.optional(z.string()),
+  revenue: z.optional(z.coerce.number()),
+  ebitda: z.optional(z.coerce.number()),
+  ebitda_margin: z.optional(z.coerce.number()),
+  gross_revenue: z.optional(z.coerce.number()),
+  company_location: z.optional(z.string()),
+  brokerage: z.optional(z.string()),
+  source_website: z.optional(z.string()),
+  inventory: z.optional(z.coerce.number()),
+  industry: z.optional(z.string()),
+  asking_price: z.optional(z.coerce.number()),
 });
 
 // infer type of formSchema
 export type EditDealFormSchemaType = z.infer<typeof EditDealFormSchema>;
 
 type EditDealFormProps = {
-  title: string;
-  first_name?: string;
-  last_name?: string;
-  direct_phone?: string;
-  work_phone?: string;
-  under_contract?: string;
-  revenue?: string;
-  link?: string;
-  asking_price?: string;
-  ebitda?: string;
-  inventory?: string;
-  grossRevenue?: string;
-  listing_code?: string;
-  state?: string;
-  status?: "Approved" | "Rejected";
-  category?: string;
-  main_content?: string;
-  explanation?: string;
-  id: string;
-  dealCollection: string;
+  deal: Deal;
 };
 
-const EditDealForm = ({
-  id,
-  title,
-  first_name,
-  last_name,
-  direct_phone,
-  work_phone,
-  under_contract,
-  revenue,
-  link,
-  asking_price,
-  listing_code,
-  state,
-  status,
-  category,
-  main_content,
-  ebitda,
-  grossRevenue,
-  inventory,
-  explanation,
-  dealCollection,
-}: EditDealFormProps) => {
+const EditDealForm = ({ deal }: EditDealFormProps) => {
+  const {
+    brokerage,
+    firstName,
+    lastName,
+    email,
+    linkedinUrl,
+    workPhone,
+    dealCaption,
+    revenue,
+    ebitda,
+    title,
+    sourceWebsite,
+    ebitdaMargin,
+    grossRevenue,
+    askingPrice,
+    industry,
+  } = deal;
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const router = useRouter();
@@ -107,24 +86,21 @@ const EditDealForm = ({
   const form = useForm<EditDealFormSchemaType>({
     resolver: zodResolver(EditDealFormSchema),
     defaultValues: {
-      first_name: first_name || "",
-      last_name: last_name || "",
-      direct_phone: direct_phone || "",
-      work_phone: work_phone || "",
-      title,
-      under_contract: under_contract || "",
-      revenue: revenue || "",
-      link: link || "",
-      asking_price: asking_price || "",
-      listing_code: listing_code || "",
-      state: state || "",
-      status: status || "Pending",
-      category: category || "",
-      main_content: main_content || "",
-      explanation: explanation || "",
-      ebitda: ebitda || "",
-      grossRevenue: grossRevenue || "",
-      inventory: inventory || "",
+      brokerage: brokerage || "",
+      first_name: firstName || "",
+      last_name: lastName || "",
+      email: email || "",
+      linkedinurl: linkedinUrl || "",
+      work_phone: workPhone || "",
+      deal_caption: dealCaption || "",
+      revenue: revenue || 0,
+      ebitda: ebitda || 0,
+      title: title || "",
+      gross_revenue: grossRevenue || 0,
+      asking_price: askingPrice || 0,
+      ebitda_margin: ebitdaMargin || 0,
+      industry: industry || "",
+      source_website: sourceWebsite || "",
     },
   });
 
@@ -132,12 +108,15 @@ const EditDealForm = ({
   function onSubmit(values: EditDealFormSchemaType) {
     startTransition(async () => {
       console.log("values", values);
-      const response = await EditDealFromFirebase(dealCollection,values, id);
+      const response = await EditDealFromFirebase(
+        values,
+        deal.id,
+        deal.dealType,
+      );
       if (response.type === "success") {
         toast({
           title: `Deal Edit successfully`,
-          description: `Deal Edit successfully from the collection from ${dealCollection}`,
-      
+          description: `Deal Edit successfully from the collection`,
         });
       }
 
@@ -153,24 +132,7 @@ const EditDealForm = ({
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="grid grid-cols-2 gap-4"
-      >
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Title</FormLabel>
-              <FormControl>
-                <Input placeholder="shadcn" {...field} />
-              </FormControl>
-              <FormDescription>This is your deal title.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="first_name"
@@ -197,14 +159,15 @@ const EditDealForm = ({
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
-          name="direct_phone"
+          name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Direct Phone</FormLabel>
+              <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="direct_phone..." {...field} />
+                <Input placeholder="email..." {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -212,12 +175,12 @@ const EditDealForm = ({
         />
         <FormField
           control={form.control}
-          name="state"
+          name="linkedinurl"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>State</FormLabel>
+              <FormLabel>Linkedin Url</FormLabel>
               <FormControl>
-                <Input placeholder="WashingtonDC..." {...field} />
+                <Input placeholder="Linkedin Url..." {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -225,39 +188,28 @@ const EditDealForm = ({
         />
         <FormField
           control={form.control}
-          name="ebitda"
+          name="deal_caption"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Ebitda</FormLabel>
+              <FormLabel>Deal Caption</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input placeholder="shadcn" {...field} />
               </FormControl>
+              <FormDescription>This is your deal title.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
         <FormField
           control={form.control}
-          name="grossRevenue"
+          name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Gross Revenue</FormLabel>
+              <FormLabel>Title</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input placeholder="shadcn" {...field} />
               </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="inventory"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Inventory</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
+              <FormDescription>This is your deal title.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -277,41 +229,6 @@ const EditDealForm = ({
         />
         <FormField
           control={form.control}
-          name="category"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Category</FormLabel>
-              <FormControl>
-                <Input placeholder="Healthcare, Aerospace...." {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="status"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Deal Approved Status</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Deal Approved by AI Model" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="Approved">Approved</SelectItem>
-                  <SelectItem value="Rejected">Rejected</SelectItem>
-                  <SelectItem value="Pending">Pending</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
           name="revenue"
           render={({ field }) => (
             <FormItem>
@@ -323,35 +240,109 @@ const EditDealForm = ({
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
-          name="under_contract"
+          name="ebitda"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Under Contract</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Deal Under Contract..." />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="Yes">Yes</SelectItem>
-                  <SelectItem value="No">No</SelectItem>
-                </SelectContent>
-              </Select>
+              <FormLabel>Ebitda</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         <FormField
           control={form.control}
-          name="link"
+          name="ebitda_margin"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Deal Link</FormLabel>
+              <FormLabel>Ebitda Margin</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="gross_revenue"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Gross Revenue</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="company_location"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Company Location</FormLabel>
               <FormControl>
                 <Input placeholder="name...." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="brokerage"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Brokerage</FormLabel>
+              <FormControl>
+                <Input placeholder="name...." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="source_website"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Source Website</FormLabel>
+              <FormControl>
+                <Input placeholder="name...." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="inventory"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Inventory</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="industry"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Industry</FormLabel>
+              <FormControl>
+                <Input placeholder="asking_price...." {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -370,59 +361,8 @@ const EditDealForm = ({
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="listing_code"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Listing Code</FormLabel>
-              <FormControl>
-                <Input placeholder="listing_code...." {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className="col-span-2">
-          <FormField
-            control={form.control}
-            name="main_content"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Teaser</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="deal teaser....."
-                    {...field}
-                    rows={15}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <div className="col-span-2">
-          <FormField
-            control={form.control}
-            name="explanation"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Screening Explanation</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="screening explanation....."
-                    {...field}
-                    rows={15}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <Button type="submit" className="w-fit" disabled={isPending}>
-          {isPending ? "Editing..." : "Edit"}
+        <Button type="submit" disabled={isPending}>
+          {isPending ? "Submitting" : "Submit"}
         </Button>
       </form>
     </Form>

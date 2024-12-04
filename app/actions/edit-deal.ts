@@ -1,8 +1,9 @@
 "use server";
 
-import { auth } from "@/auth";
 import { EditDealFormSchemaType } from "@/components/forms/edit-deal-form";
 import { db } from "@/lib/firebase/init";
+import prismaDB from "@/lib/prisma";
+import { DealType } from "@prisma/client";
 import { doc, getDoc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { revalidatePath } from "next/cache";
 
@@ -13,58 +14,55 @@ import { revalidatePath } from "next/cache";
  * validated by the `NewDealFormSchemaType` schema. It is intended for use in React applications
  * where form submissions are validated using Zod schemas before interacting with Firebase.
  *
- * @param {string} collectionName - Name of the collection we want to edit
  * @param {EditDealFormSchemaType} values - An object containing the form values that conform
  * @param {string} dealId - The ID of the deal document to update.
  *                                         to the `NewDealFormSchemaType` schema. This includes
  *                                         all necessary fields and structure expected by Firebase.
+ *
+ * @param {DealType} dealType - The type of deal it returns
  *
  * @returns {Promise<object>} Returns a promise that resolves to an object indicating the result
  *                            of the update operation.
  */
 
 export default async function EditDealFromFirebase(
-  collectionName: string,
   values: EditDealFormSchemaType,
   dealId: string,
+  dealType: DealType,
 ) {
-  console.log("in update deal in firebase", dealId, values);
-
-  const userSession = await auth();
-
-  if (!userSession) {
-    return {
-      type: "error",
-      message: "User not authenticated, cannot update Deal",
-    };
-  }
-
   try {
-    const dealRef = doc(db, collectionName, dealId);
-    const dealSnapshot = await getDoc(dealRef);
-
-    if (!dealSnapshot.exists()) {
-      return {
-        type: "error",
-        message: "Deal not found, cannot update non-existent deal",
-      };
-    }
-
-    await updateDoc(dealRef, {
-      ...values,
-      updated_at: serverTimestamp(),
+    await prismaDB.deal.update({
+      where: {
+        id: dealId,
+      },
+      data: {
+        title: values.title,
+        dealCaption: values.deal_caption,
+        firstName: values.first_name,
+        lastName: values.last_name,
+        email: values.email,
+        linkedinUrl: values.linkedinurl,
+        workPhone: values.work_phone,
+        revenue: values.revenue,
+        ebitda: values.ebitda,
+        ebitdaMargin: values.ebitda_margin,
+        grossRevenue: values.gross_revenue,
+        companyLocation: values.company_location,
+        brokerage: values.brokerage,
+        sourceWebsite: values.source_website || "",
+        industry: values.industry,
+        askingPrice: values.asking_price,
+      },
     });
 
-    if (collectionName === "deals") {
-      // because we are updating a deal, we need to revalidate the cache for the deal page
-      // for collection deals we have the route as /raw-deals/[dealId]
-      revalidatePath(`/raw-deals/${dealId}`);
-    } else {
-      // for rest we have the route as the collection Name itself
-      revalidatePath(`/${collectionName}/${dealId}`);
+    switch (dealType) {
+      case "MANUAL":
+        revalidatePath(`/manual-deals/${dealId}`);
+      case "SCRAPED":
+        revalidatePath(`/raw-deals/${dealId}`);
+      case "AI_INFERRED":
+        revalidatePath(`/inferred-deals/${dealId}`);
     }
-
-    console.log("Document updated with ID: ", dealId);
 
     return {
       type: "success",

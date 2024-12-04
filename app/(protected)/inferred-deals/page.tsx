@@ -2,6 +2,8 @@ import React, { Suspense } from "react";
 import FetchingInferredDeals from "./FetchingInferredDeals";
 import DealCardSkeleton from "@/components/skeletons/DealCardSkeleton";
 import { Metadata } from "next";
+import prismaDB from "@/lib/prisma";
+import DealCard from "@/components/DealCard";
 
 export const metadata: Metadata = {
   title: "Inferred Deals",
@@ -9,13 +11,19 @@ export const metadata: Metadata = {
 };
 
 const InferredDealsPage = async () => {
+  const deals = await prismaDB.deal.findMany({
+    where: {
+      dealType: "AI_INFERRED",
+    },
+  });
+
   return (
-    <section className="block-space big-container">
+    <section className="block-space container">
       <div>
         <h1 className="mb-4">Inferred Deals</h1>
         <Suspense
           fallback={
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="blog-index">
               <DealCardSkeleton />
               <DealCardSkeleton />
               <DealCardSkeleton />
@@ -25,7 +33,11 @@ const InferredDealsPage = async () => {
             </div>
           }
         >
-          <FetchingInferredDeals />
+          <div className="blog-index">
+            {deals.map((e) => {
+              return <DealCard key={e.id} deal={e} />;
+            })}
+          </div>
         </Suspense>
       </div>
     </section>

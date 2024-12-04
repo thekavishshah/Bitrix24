@@ -1,12 +1,13 @@
 "use server";
 
-import { auth } from "@/auth";
 import {
   NewDealFormSchema,
   NewDealFormSchemaType,
 } from "@/components/forms/new-deal-form";
-import { db } from "@/lib/firebase/init";
+import prismaDB from "@/lib/prisma";
+import { DealType } from "@prisma/client";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { revalidatePath } from "next/cache";
 import React from "react";
 
 /**
@@ -22,46 +23,48 @@ import React from "react";
  *
  * @returns {Promise<void>} Returns a promise that resolves once the deal has been added to Firebase.
  */
-const AddDealToFirebase = async (values: NewDealFormSchemaType) => {
-  console.log("in add deal to firebase", values);
-
-  const userSession = await auth();
-
-  if (!userSession) {
-    return {
-      type: "error",
-      message: "User not authenticated, cannot add Deal",
-    };
-  }
-
+const AddDealToDB = async (values: NewDealFormSchemaType) => {
   try {
-    // const validatedFields = NewDealFormSchema.safeParse(values);
+    console.log("in add deal to firebase", values);
 
-    // if (!validatedFields.success) {
-    //   return {
-    //     type: "error",
-    //     message: "Server Side Error from Zod",
-    //   };
-    // }
-
-    const docRef = await addDoc(collection(db, "manual-deals"), {
-      ...values,
-      created_at: serverTimestamp(),
+    const addedDeal = await prismaDB.deal.create({
+      data: {
+        title: values.title,
+        dealCaption: values.deal_caption,
+        firstName: values.first_name,
+        lastName: values.last_name,
+        email: values.email,
+        linkedinUrl: values.linkedinurl,
+        workPhone: values.work_phone,
+        revenue: values.revenue,
+        ebitda: values.ebitda,
+        ebitdaMargin: values.ebitda_margin,
+        grossRevenue: values.gross_revenue,
+        companyLocation: values.company_location,
+        brokerage: values.brokerage,
+        sourceWebsite: values.source_website || "",
+        industry: values.industry,
+        askingPrice: values.asking_price,
+        dealType: DealType.MANUAL,
+      },
     });
 
-    console.log("Document written with ID: ", docRef.id);
+    revalidatePath(`/manual-deals`);
 
     return {
       type: "success",
       message: "Deal saved successfully",
-      documentId: docRef.id,
+      documentId: addedDeal.id,
     };
   } catch (error) {
     console.error("Error adding deal: ", error);
     if (error instanceof Error) {
       return {
         type: "error",
-        message: `Failed to add the deal: ${error.message}`,
+        message:
+          error.message.length > 0
+            ? error.message
+            : "Failed to add the deal. Please try again.",
       };
     }
 
@@ -72,4 +75,4 @@ const AddDealToFirebase = async (values: NewDealFormSchemaType) => {
   }
 };
 
-export default AddDealToFirebase;
+export default AddDealToDB;

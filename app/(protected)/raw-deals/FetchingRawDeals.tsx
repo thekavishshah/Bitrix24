@@ -13,7 +13,6 @@ const FetchingRawDeals = () => {
   const [isPreviousAvailable, setIsPreviousAvailable] = useState(false);
   const [loading, setLoading] = useState(false);
 
-
   useEffect(() => {
     setLoading(true);
     const fetchData = async () => {
@@ -65,28 +64,8 @@ const FetchingRawDeals = () => {
   };
 
   return (
-    <div className="big-container">
-      {loading ? (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <DealCardSkeleton />
-          <DealCardSkeleton />
-          <DealCardSkeleton />
-          <DealCardSkeleton />
-          <DealCardSkeleton />
-          <DealCardSkeleton />
-          <DealCardSkeleton />
-          <DealCardSkeleton />
-        </div>
-      ) : (
-        <div className="blog-index">
-          {data.map((e) => {
-            return <RawDealCard key={e.id} deal={e} />;
-          })}
-        </div>
-      )}
-
-      {/* Pagination controls */}
-      <div className="mt-4 w-full justify-end space-x-2">
+    <div className="container">
+      <div className="my-4 w-full space-x-2">
         <Button
           onClick={() => {
             showPrevious(data[0] as SnapshotDeal);
@@ -105,6 +84,25 @@ const FetchingRawDeals = () => {
           Next
         </Button>
       </div>
+
+      {loading ? (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <DealCardSkeleton />
+          <DealCardSkeleton />
+          <DealCardSkeleton />
+          <DealCardSkeleton />
+          <DealCardSkeleton />
+          <DealCardSkeleton />
+          <DealCardSkeleton />
+          <DealCardSkeleton />
+        </div>
+      ) : (
+        <div className="blog-index">
+          {data.map((e) => {
+            return <RawDealCard key={e.id} deal={e} />;
+          })}
+        </div>
+      )}
     </div>
   );
 };

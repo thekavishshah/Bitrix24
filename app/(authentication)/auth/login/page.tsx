@@ -18,12 +18,12 @@ const LoginPage = async () => {
   //   }
 
   return (
-    <div className="flex items-center justify-center h-full bg-gray-50">
-      <div className="max-w-md w-full px-8 py-12 space-y-6">
+    <div className="flex h-full items-center justify-center bg-gray-50">
+      <div className="w-full max-w-md space-y-6 px-8 py-12">
         <h2 className="text-center">
           Welcome to Dark Alpha Deal Sourcing Organization
         </h2>
-        <p className="text-sm text-gray-600 text-center">
+        <p className="text-center text-sm text-gray-600">
           Please sign in to access deal screening using AI.
         </p>
 
@@ -33,7 +33,7 @@ const LoginPage = async () => {
           </div>
         </Suspense>
 
-        <p className="text-xs text-gray-500 text-center">
+        <p className="text-center text-xs text-gray-500">
           Only authorized members of the organization can access this platform.
         </p>
       </div>

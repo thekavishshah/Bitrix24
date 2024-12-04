@@ -12,7 +12,7 @@ const ErrorCard = () => {
   if (error === "AccessDenied") {
     return (
       <div>
-        <span className="error text-red-600 font-semibold">
+        <span className="error font-semibold text-red-600">
           Your email account is not authorized to access this content
         </span>
       </div>
@@ -21,7 +21,7 @@ const ErrorCard = () => {
 
   return (
     <div>
-      <span className="error text-red-600 font-semibold">
+      <span className="error font-semibold text-red-600">
         {error ? error : null}
       </span>
     </div>

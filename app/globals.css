@@ -100,7 +100,7 @@ body {
   }
 
   p {
-    @apply leading-7 text-black [&:not(:first-child)]:mt-6;
+    @apply leading-7 [&:not(:first-child)]:mt-6;
   }
 
   .lead {

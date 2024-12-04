@@ -15,6 +15,7 @@ import {
 import { getDocs, query, limit } from "firebase/firestore";
 import { doc, deleteDoc } from "firebase/firestore";
 import { db } from "./init";
+import { ManualDeal, TransformedDeal } from "@/app/types";
 
 export type Questionnaire = {
   id: string;
@@ -86,6 +87,57 @@ export async function fetchDocumentsWithPagination(
 ): Promise<SnapshotDeal[]> {
   try {
     const collectionRef = collection(db, collectionName);
+    console.log("lastVisibleDoc:", lastVisibleDoc);
+    let q;
+
+    if (order === "next" && lastVisibleDoc) {
+      q = query(
+        collectionRef,
+        orderBy("created_at", "desc"),
+        startAfter(lastVisibleDoc.created_at),
+        limit(limitCount),
+      );
+    } else if (order === "previous" && lastVisibleDoc) {
+      q = query(
+        collectionRef,
+        orderBy("created_at", "desc"),
+        endBefore(lastVisibleDoc.created_at),
+        limitToLast(limitCount),
+      );
+    } else {
+      q = query(
+        collectionRef,
+        orderBy("created_at", "desc"),
+        limit(limitCount),
+      );
+    }
+
+    const querySnapshot = await getDocs(q);
+    const documents: any = [];
+    querySnapshot.forEach((doc) => {
+      documents.push({
+        id: doc.id,
+        ...doc.data(),
+      });
+    });
+
+    return documents;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.log("error Error fetching documents", error.message);
+    }
+    console.error("Error fetching documents: ", error);
+    return [];
+  }
+}
+
+export async function fetchManualDealsWithPagination(
+  limitCount = 15,
+  order: "next" | "previous" = "next",
+  lastVisibleDoc?: any,
+): Promise<ManualDeal[]> {
+  try {
+    const collectionRef = collection(db, "manual-deals");
     console.log("lastVisibleDoc:", lastVisibleDoc);
     let q;
 
@@ -283,7 +335,7 @@ export async function fetchSpecificInferredDeal(
 
 export async function fetchSpecificManualDeal(
   dealId: string,
-): Promise<SnapshotDeal | null> {
+): Promise<ManualDeal | null> {
   try {
     const dealRef = doc(db, "manual-deals", dealId); // Replace "deals" with your collection name
     const dealSnapshot = await getDoc(dealRef);
@@ -292,7 +344,7 @@ export async function fetchSpecificManualDeal(
       return {
         id: dealSnapshot.id,
         ...dealSnapshot.data(),
-      } as SnapshotDeal;
+      } as ManualDeal;
     } else {
       console.log("No such document!");
       return null;

@@ -1,0 +1,93 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id   String @id @default(cuid())
+  name String
+}
+
+model Deal {
+  id              String        @id @default(cuid())
+  brokerage       String
+  firstName       String?
+  lastName        String?
+  email           String?
+  linkedinUrl     String?
+  workPhone       String?
+  dealCaption     String
+  revenue         Float
+  ebitda          Float
+  title           String?
+  grossRevenue    Float?
+  askingPrice     Float?
+  ebitdaMargin    Float
+  industry        String
+  dealType        DealType      @default(MANUAL)
+  sourceWebsite   String
+  companyLocation String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @default(now()) @updatedAt
+  SIM             SIM[]
+  AiScreening     AiScreening[]
+}
+
+model SIM {
+  id        String    @id @default(cuid())
+  title     String
+  caption   String
+  status    SIMStatus
+  fileName  String
+  fileType  String
+  fileUrl   String
+  dealId    String
+  deal      Deal      @relation(fields: [dealId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Questionnaire {
+  id         String   @id @default(cuid())
+  fileUrl    String
+  title      String
+  purpose    String
+  author     String
+  version    String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("questionnaires")
+}
+
+enum DealType {
+  SCRAPED
+  MANUAL
+  AI_INFERRED
+}
+
+enum SIMStatus {
+  IN_PROGRESS
+  COMPLETED
+}
+
+model AiScreening {
+  id          String   @id @default(cuid())
+  dealId      String
+  deal        Deal     @relation(fields: [dealId], references: [id])
+  title       String
+  explanation String
+  sentiment   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

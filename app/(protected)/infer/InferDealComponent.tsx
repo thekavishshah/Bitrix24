@@ -65,18 +65,18 @@ export const InferNewDealComponent = () => {
 
   return (
     <section className="big-container block-space">
-      <div className="mb-6 text-center md:mb-8 space-y-2">
+      <div className="mb-6 space-y-2 text-center md:mb-8">
         <h1>Infer a New Deal</h1>
-        <span className="text-gray-600 block mb-2 text-center">
+        <span className="mb-2 block text-center text-muted-foreground">
           Enter the description of a deal and use AI to generate the required
           format for the deal, save it to the database and then scrape it
         </span>
 
-        <span className="text-red-600 mb-6 text-center block">
+        <span className="mb-6 block text-center text-red-600">
           Note:- Double check the output given by AI and save it accordingly
         </span>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 lg:gap-12">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-8 lg:gap-12">
         <div>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -121,7 +121,7 @@ export const InferNewDealComponent = () => {
               {generation}
             </pre>
           </div>
-          <div className="mt-4 md:mt-6 flex items-center justify-between">
+          <div className="mt-4 flex items-center justify-between md:mt-6">
             <Button
               variant={"success"}
               onClick={() => {
@@ -136,7 +136,7 @@ export const InferNewDealComponent = () => {
                           altText="View Deal"
                           onClick={() => {
                             router.push(
-                              `/inferred-deals/${response.documentId}`
+                              `/inferred-deals/${response.documentId}`,
                             );
                           }}
                         >
@@ -157,11 +157,12 @@ export const InferNewDealComponent = () => {
                 generation === ""
                   ? true
                   : false || saveDealPending
-                  ? true
-                  : false
+                    ? true
+                    : false
               }
             >
-              <Save className="mr-2 size-4" /> Save Deal
+              <Save className="mr-2 size-4" />{" "}
+              {saveDealPending ? "Saving..." : "Save Deal"}
             </Button>
 
             {/* <EditInferDealDialog /> */}

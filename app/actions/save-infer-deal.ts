@@ -2,6 +2,7 @@
 
 import { InferDealSchema } from "@/components/schemas/infer-deal-schema";
 import { db } from "@/lib/firebase/init";
+import prismaDB from "@/lib/prisma";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 
 // create a sample zod schema
@@ -12,9 +13,9 @@ export default async function SaveInferredDeal({
   generation: string;
 }) {
   try {
-    const parsedDeal = await JSON.parse(generation);
+    const parsedJSONDeal = await JSON.parse(generation);
 
-    const validatedFields = InferDealSchema.safeParse(parsedDeal);
+    const validatedFields = InferDealSchema.safeParse(parsedJSONDeal);
 
     if (!validatedFields.success) {
       return {
@@ -23,16 +24,31 @@ export default async function SaveInferredDeal({
       };
     }
 
-    console.log("parsed deal in save inferred deal is", parsedDeal);
+    console.log("parsed deal in save inferred deal is", validatedFields.data);
+
+    const parsedDeal = validatedFields.data;
 
     console.log("saving inferred deals.....");
 
-    const docRef = await addDoc(collection(db, "inferred-deals"), {
-      ...validatedFields.data,
-      created_at: serverTimestamp(),
+    const docRef = await prismaDB.deal.create({
+      data: {
+        sourceWebsite: parsedDeal.sourceWebsite || "",
+        firstName: parsedDeal.firstName || "",
+        lastName: parsedDeal.lastName || "",
+        email: parsedDeal.email || "",
+        companyLocation: parsedDeal.companyLocation || "",
+        dealCaption: parsedDeal.dealCaption || "",
+        industry: parsedDeal.industry || "",
+        askingPrice: parsedDeal.askingPrice || 0,
+        revenue: parsedDeal.revenue || 0,
+        grossRevenue: parsedDeal.grossRevenue || 0,
+        title: parsedDeal.title || "",
+        ebitda: parsedDeal.ebitda || 0,
+        ebitdaMargin: parsedDeal.ebitdaMargin || 0,
+        brokerage: parsedDeal.brokerage || "Not Mentioned",
+        dealType: "AI_INFERRED",
+      },
     });
-
-    console.log("Document written with ID: ", docRef.id);
 
     return {
       type: "success",

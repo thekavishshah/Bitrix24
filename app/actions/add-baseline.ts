@@ -1,9 +1,7 @@
 "use server";
 
-import { BaselineUploadZodType } from "@/components/forms/baseline-upload-form";
-import { db } from "@/lib/firebase/init";
+import prismaDB from "@/lib/prisma";
 import { put } from "@vercel/blob";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { revalidatePath } from "next/cache";
 
 export default async function AddScreeningBaseline(values: FormData) {
@@ -11,10 +9,10 @@ export default async function AddScreeningBaseline(values: FormData) {
     console.log("in add baseline to firebase", values);
 
     const questionnaire = values.get("questionnaire") as File;
-    const title = values.get("title");
-    const purpose = values.get("purpose");
-    const author = values.get("author");
-    const version = values.get("version");
+    const title = values.get("title") as string;
+    const purpose = values.get("purpose") as string;
+    const author = values.get("author") as string;
+    const version = values.get("version") as string;
 
     console.log({ questionnaire, title, purpose, author, version });
 
@@ -22,18 +20,19 @@ export default async function AddScreeningBaseline(values: FormData) {
       access: "public",
     });
 
-    const docRef = await addDoc(collection(db, "questionnaires"), {
-      url,
-      title,
-      purpose,
-      author,
-      version,
-      created_at: serverTimestamp(),
+    const docRef = await prismaDB.questionnaire.create({
+      data: {
+        fileUrl: url,
+        title,
+        purpose,
+        author,
+        version,
+      },
     });
 
     console.log("Document written with ID: ", docRef.id);
 
-    revalidatePath("/screening-baseline");
+    revalidatePath("/questionnaires");
 
     return {
       type: "success",

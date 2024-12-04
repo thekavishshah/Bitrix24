@@ -1,5 +1,8 @@
 import ScreenDealComponent from "@/components/ScreenDealComponent";
-import { fetchSpecificInferredDeal } from "@/lib/firebase/db";
+import {
+  fetchQuestionnaires,
+  fetchSpecificInferredDeal,
+} from "@/lib/firebase/db";
 import { Metadata } from "next";
 import React from "react";
 
@@ -29,7 +32,7 @@ export async function generateMetadata({
 
 const InferredDealScreenPage = async ({ params }: { params: Params }) => {
   const { uid } = await params;
-
+  const questionnaires = await fetchQuestionnaires();
   const fetchedDeal = await fetchSpecificInferredDeal(uid);
 
   if (!fetchedDeal) {
@@ -62,6 +65,9 @@ const InferredDealScreenPage = async ({ params }: { params: Params }) => {
     grossRevenue,
     inventory,
   } = fetchedDeal;
+
+  console.log("questionnaires", questionnaires);
+
   return (
     <section className="block-space big-container">
       <h2 className="mb-4">Screen this Deal</h2>
@@ -86,6 +92,7 @@ const InferredDealScreenPage = async ({ params }: { params: Params }) => {
         category={category}
         grossRevenue={grossRevenue}
         inventory={inventory}
+        questionnairesData={JSON.stringify(questionnaires)}
       />
     </section>
   );

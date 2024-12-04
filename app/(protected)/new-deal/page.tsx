@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import CreateNewDealForm from "@/components/forms/new-deal-form";
 import { Metadata } from "next";
+import { BulkImportDialog } from "@/components/Dialogs/bulk-import-dialog";
 
 export const metadata: Metadata = {
   title: "Add New Deal",
@@ -24,11 +25,11 @@ const NewDealPage = async () => {
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:gap-8">
         <div className="">
           <div className="space-y-4 lg:sticky lg:top-24">
-            <div className="h-fit rounded-lg border border-gray-200 bg-white p-6 shadow-lg">
+            <div className="h-fit rounded-lg border bg-muted p-6 shadow-lg">
               <h2 className="mb-4 text-center text-xl font-semibold">
                 Bulk Import Deals
               </h2>
-              <p className="mb-2 text-center text-gray-600">
+              <p className="mb-2 text-center text-gray-600 dark:text-gray-200">
                 Quickly import multiple deals at once by uploading a file. Save
                 time and effort with bulk import functionality.
               </p>
@@ -37,15 +38,13 @@ const NewDealPage = async () => {
                 keep in mind that the excel sheet should be in a specific format
                 for bulk upload
               </p>
-              {/* <div className="flex justify-center">
-              <BulkUploadDealsDialog />
-            </div> */}
+              <BulkImportDialog />
             </div>
-            <div className="h-fit rounded-lg border border-gray-200 bg-white p-6 shadow-lg">
+            <div className="h-fit rounded-lg border bg-muted p-6 shadow-lg">
               <h2 className="mb-4 text-center text-xl font-semibold">
                 Infer Deal
               </h2>
-              <p className="mb-2 text-center text-gray-600">
+              <p className="mb-2 text-center text-gray-600 dark:text-gray-200">
                 Enter the description of a deal and use AI to generate the
                 required format for the deal, save it to the database and then
                 scrape it

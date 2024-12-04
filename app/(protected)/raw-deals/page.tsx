@@ -23,9 +23,7 @@ const RawDealsPage = async () => {
             <DealCardSkeleton />
           </div>
         }
-      >
-        <FetchingRawDeals />
-      </Suspense>
+      ></Suspense>
     </div>
   );
 };

@@ -6,98 +6,85 @@ import { usePathname, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { MdMenu, MdClose } from "react-icons/md";
 import {
+  FiPlus,
+  FiList,
+  FiCheckSquare,
+  FiEdit,
+  FiTrendingUp,
+  FiSearch,
+} from "react-icons/fi";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { signOut, useSession } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
-// import { liteClient as algoliasearch } from "algoliasearch/lite";
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Session } from "next-auth";
 import { ModeToggle } from "./mode-toggle";
+import { Session } from "next-auth";
+import { signOut, useSession } from "next-auth/react";
 
 type HeaderProps = {
+  className?: string;
   session: Session | null;
-  classname?: string;
 };
 
 export const NavLinks = [
-  { navlink: "/new-deal", navlabel: "New" },
-  { navlink: "/raw-deals", navlabel: "Raw" },
-  { navlink: "/published-deals", navlabel: "Published" },
-  { navlink: "/manual-deals", navlabel: "Manual" },
-  { navlink: "/inferred-deals", navlabel: "Inferred " },
-  { navlink: "/infer", navlabel: "Infer" },
+  { navlink: "/new-deal", navlabel: "New", icon: FiPlus },
+  { navlink: "/raw-deals", navlabel: "Raw", icon: FiList },
+  { navlink: "/published-deals", navlabel: "Published", icon: FiCheckSquare },
+  { navlink: "/manual-deals", navlabel: "Manual", icon: FiEdit },
+  { navlink: "/inferred-deals", navlabel: "Inferred", icon: FiTrendingUp },
+  { navlink: "/infer", navlabel: "Infer", icon: FiSearch },
 ];
 
-const Header = ({ classname, session }: HeaderProps) => {
+const Header = ({ className, session }: HeaderProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 0);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <>
-      <header
-        className={clsx(
-          "sticky top-0 z-50 border-b bg-background px-2 py-2 md:px-4 lg:px-12",
-          classname,
-        )}
-      >
-        <nav aria-label="Main-navigation">
-          <ul className="flex flex-col justify-between md:m-4 md:flex-row md:items-center md:rounded-xl">
-            <div className="flex items-center justify-between">
-              <NameLogo />
-              <button
-                aria-label="Open menu"
-                className="block text-2xl text-black dark:text-white md:hidden"
-                onClick={() => setIsOpen(true)}
-              >
-                <MdMenu />
-              </button>
-            </div>
-            <div
-              className={clsx(
-                "fixed bottom-0 left-0 right-0 top-0 z-50 flex flex-col items-end gap-4 bg-black pr-4 pt-14 text-white transition-transform duration-300 ease-in-out md:hidden",
-                isOpen ? "translate-x-0" : "translate-x-[100%]",
-              )}
+    <header
+      className={clsx(
+        "sticky top-0 z-50 transition-all duration-300",
+        isScrolled ? "bg-background/80 backdrop-blur-md" : "bg-background",
+        "border-b px-4 py-3 lg:px-8",
+        className,
+      )}
+    >
+      <nav aria-label="Main-navigation" className="mx-auto max-w-7xl">
+        <ul className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <NameLogo />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden"
+              onClick={() => setIsOpen(true)}
             >
-              <button
-                aria-label="Close menu"
-                className="fixed right-4 top-3 block p-2 text-2xl text-white md:hidden"
-                onClick={() => setIsOpen(false)}
-              >
-                <MdClose />
-              </button>
-              {NavLinks.map((item, index) => {
-                return (
-                  <Link
-                    href={item.navlink}
-                    key={index}
-                    onClick={() => {
-                      setIsOpen(false);
-                    }}
-                    className={clsx(
-                      "",
-                      pathname === item.navlink ? "underline" : "",
-                    )}
-                  >
-                    {item.navlabel}
-                  </Link>
-                );
-              })}
-            </div>
-            <DesktopMenu />
-            {/* <ModeToggle /> */}
+              <MdMenu className="h-6 w-6" />
+            </Button>
+          </div>
+          <DesktopMenu pathname={pathname} />
+          <div className="flex items-center space-x-4">
             {session ? <ProfileMenu session={session} /> : <AuthDialogNavs />}
-          </ul>
-        </nav>
-      </header>
-    </>
+            <ModeToggle />
+          </div>
+        </ul>
+      </nav>
+      <MobileMenu isOpen={isOpen} setIsOpen={setIsOpen} pathname={pathname} />
+    </header>
   );
 };
 
@@ -105,38 +92,88 @@ export default Header;
 
 function NameLogo() {
   return (
-    <div className="">
-      <Link
-        href="/"
-        aria-label="Home page"
-        className="text-mainC text-3xl font-bold md:text-4xl"
-      >
-        Deal Sourcing
-      </Link>
+    <Link
+      href="/"
+      aria-label="Home page"
+      className="text-2xl font-bold text-primary transition-colors hover:text-primary/80"
+    >
+      Deal Sourcing
+    </Link>
+  );
+}
+
+function DesktopMenu({ pathname }: { pathname: string }) {
+  return (
+    <div className="hidden space-x-1 md:flex">
+      {NavLinks.map((item, index) => (
+        <Link
+          href={item.navlink}
+          key={index}
+          className={clsx(
+            "flex items-center space-x-1 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent",
+            pathname === item.navlink
+              ? "bg-accent text-accent-foreground"
+              : "text-muted-foreground",
+          )}
+        >
+          <item.icon className="h-4 w-4" />
+          <span>{item.navlabel}</span>
+        </Link>
+      ))}
     </div>
   );
 }
 
-function DesktopMenu() {
-  const pathname = usePathname();
+function MobileMenu({
+  isOpen,
+  setIsOpen,
+  pathname,
+}: {
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+  pathname: string;
+}) {
   return (
-    <div className="hidden gap-8 md:flex md:items-center">
-      {NavLinks.map((item, index) => {
-        return (
-          <Link
-            href={item.navlink}
-            key={index}
-            className={clsx(
-              "hover:text-mainC hover:decoration-mainC font-bold transition hover:underline hover:decoration-4 hover:underline-offset-8",
-              pathname === item.navlink
-                ? "text-mainC underline decoration-4 underline-offset-8"
-                : "",
-            )}
+    <div
+      className={clsx(
+        "fixed inset-0 z-50 bg-background/80 backdrop-blur-sm md:hidden",
+        isOpen ? "block" : "hidden",
+      )}
+    >
+      <div className="fixed inset-y-0 right-0 w-full max-w-sm border-l bg-background p-6 shadow-lg">
+        <div className="flex items-center justify-between">
+          <NameLogo />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-muted-foreground"
+            onClick={() => setIsOpen(false)}
           >
-            {item.navlabel}
-          </Link>
-        );
-      })}
+            <MdClose className="h-6 w-6" />
+          </Button>
+        </div>
+        <nav className="mt-6">
+          <ul className="space-y-2">
+            {NavLinks.map((item, index) => (
+              <li key={index}>
+                <Link
+                  href={item.navlink}
+                  onClick={() => setIsOpen(false)}
+                  className={clsx(
+                    "flex items-center space-x-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent",
+                    pathname === item.navlink
+                      ? "bg-accent text-accent-foreground"
+                      : "text-muted-foreground",
+                  )}
+                >
+                  <item.icon className="h-5 w-5" />
+                  <span>{item.navlabel}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
     </div>
   );
 }

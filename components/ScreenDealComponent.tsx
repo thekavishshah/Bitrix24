@@ -1,24 +1,10 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { readStreamableValue } from "ai/rsc";
-import { screenDeal } from "@/app/actions/screen-deal";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { Save, Trash2, Loader2 } from "lucide-react";
-
+import screenDeal from "@/app/actions/screen-deal";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useToast } from "@/hooks/use-toast";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -26,198 +12,142 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { DealType } from "@prisma/client";
+import SaveScreeningResultToDB from "@/app/actions/save-screen-deal";
+import { useToast } from "@/hooks/use-toast";
 
-// Allow streaming responses up to 30 seconds
-export const maxDuration = 30;
-
-export const ScreenDealFormSchema = z.object({
-  type: z.enum(["one", "two"], {
-    required_error: "You need to select a questionnaire type.",
-  }),
-});
-
-type ScreenDealComponentProps = {
+interface AIReasoningProps {
   title: string;
-  first_name?: string;
-  last_name?: string;
-  direct_phone?: string;
-  work_phone?: string;
-  under_contract?: string;
-  revenue?: string;
-  link?: string;
-  asking_price?: string;
-  ebitda?: string;
-  inventory?: string;
-  grossRevenue?: string;
-  listing_code?: string;
-  state?: string;
-  status?: "Approved" | "Rejected";
-  category?: string;
-  main_content?: string;
-  explanation?: string;
-  id: string;
-  dealCollection: string;
-};
+  explanation: string;
+  sentiment: "positive" | "neutral" | "negative";
+}
 
 export default function ScreenDealComponent({
-  title,
-  first_name,
-  last_name,
-  direct_phone,
-  work_phone,
-  under_contract,
-  revenue,
-  link,
-  asking_price,
-  ebitda,
-  inventory,
-  grossRevenue,
-  listing_code,
-  state,
-  status,
-  category,
-  main_content,
-  explanation,
-  id,
-  dealCollection,
-}: ScreenDealComponentProps) {
-  const [generation, setGeneration] = useState<string>("");
-  const [isPending, startTransition] = useTransition();
+  dealId,
+  dealType,
+}: {
+  dealId: string;
+  dealType: DealType;
+}) {
   const { toast } = useToast();
+  const [isPending, startTransition] = useTransition();
+  const [savePending, startSaveTransition] = useTransition();
+  const [file, setFile] = useState<File | null>(null);
+  const [comment, setComment] = useState("");
+  const [aiReasoning, setAiReasoning] = useState<AIReasoningProps | null>(null);
 
-  const form = useForm<z.infer<typeof ScreenDealFormSchema>>({
-    resolver: zodResolver(ScreenDealFormSchema),
-  });
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setFile(e.target.files[0]);
+    }
+  };
 
-  function onSubmit(data: z.infer<typeof ScreenDealFormSchema>) {
+  const handleScreenDeal = async () => {
     startTransition(async () => {
-      const dealData = JSON.stringify({
-        title,
-        first_name,
-        last_name,
-        direct_phone,
-        work_phone,
-        under_contract,
-        revenue,
-        link,
-        asking_price,
-        ebitda,
-        inventory,
-        grossRevenue,
-        listing_code,
-        state,
-        status,
-        category,
-        main_content,
-        explanation,
-        id,
-      });
+      if (!file) return;
 
-      const { text } = await screenDeal(dealData, data);
-      setGeneration(text);
-    });
-  }
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("comment", comment);
+      formData.append("dealId", dealId);
 
-  const handleSave = () => {
-    // Implement save functionality here
-    toast({
-      title: "Explanation Saved",
-      description: "The generated explanation has been saved successfully.",
+      try {
+        const result = await screenDeal(formData);
+        setAiReasoning(result);
+      } catch (error) {
+        console.error("Error screening deal:", error);
+      } finally {
+      }
     });
   };
 
-  const handleRemove = () => {
-    setGeneration("");
-    toast({
-      title: "Explanation Removed",
-      description: "The generated explanation has been removed.",
+  const handleTryAgain = () => {
+    setAiReasoning(null);
+  };
+
+  const handleSaveAIReasoning = async () => {
+    startSaveTransition(async () => {
+      if (!aiReasoning) return;
+      console.log("Saving AI Reasoning:", aiReasoning);
+      const response = await SaveScreeningResultToDB(
+        aiReasoning,
+        dealId,
+        dealType,
+      );
+
+      if (response.type === "success") {
+        toast({
+          title: "Screening Result Saved",
+          description: "The screening result has been saved successfully.",
+        });
+      }
+
+      if (response.type === "error") {
+        toast({
+          title: "Error Saving Screening Result",
+          description: response.message,
+          variant: "destructive",
+        });
+      }
     });
   };
 
   return (
-    <Card className="mx-auto w-full max-w-3xl">
+    <Card className="mx-auto w-full max-w-2xl">
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
+        <CardTitle>Screen Deal</CardTitle>
       </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="type"
-              render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel>Select a Questionnaire</FormLabel>
-                  <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      className="flex flex-col space-y-1"
-                    >
-                      <FormItem className="flex items-center space-x-3 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="one" />
-                        </FormControl>
-                        <FormLabel className="font-normal">
-                          Questionnaire 1
-                        </FormLabel>
-                      </FormItem>
-                      <FormItem className="flex items-center space-x-3 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="two" />
-                        </FormControl>
-                        <FormLabel className="font-normal">
-                          Questionnaire 2
-                        </FormLabel>
-                      </FormItem>
-                    </RadioGroup>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit" disabled={isPending}>
-              {isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                "Generate"
-              )}
-            </Button>
-          </form>
-        </Form>
-
-        {isPending ? (
-          <div className="mt-6 space-y-2">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-3/4" />
-          </div>
-        ) : generation ? (
-          <div className="mt-6">
-            <h3 className="mb-2 text-lg font-semibold">
-              Generated Explanation:
-            </h3>
-            <div className="rounded-md bg-muted p-4">
-              <pre className="whitespace-pre-wrap text-sm text-muted-foreground">
-                {generation}
-              </pre>
-            </div>
-          </div>
-        ) : null}
-      </CardContent>
-      {generation && (
-        <CardFooter className="flex justify-end space-x-2">
-          <Button variant="outline" onClick={handleSave}>
-            <Save className="mr-2 h-4 w-4" />
-            Save Explanation
+      <CardContent className="space-y-4">
+        <div>
+          <Input
+            type="file"
+            accept=".txt,.docx"
+            onChange={handleFileChange}
+            className="mb-2"
+          />
+          <p className="text-sm text-muted-foreground">
+            Upload a .txt or .docx file with screening criteria
+          </p>
+        </div>
+        <Textarea
+          placeholder="Additional comments..."
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+        />
+        {!aiReasoning && (
+          <Button onClick={handleScreenDeal} disabled={!file || isPending}>
+            {isPending ? "Screening..." : "Screen Deal"}
           </Button>
-          <Button variant="outline" onClick={handleRemove}>
-            <Trash2 className="mr-2 h-4 w-4" />
-            Remove Explanation
+        )}
+
+        {aiReasoning && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">{aiReasoning.title}</h3>
+            <p className="whitespace-pre-wrap">{aiReasoning.explanation}</p>
+            <p>
+              Sentiment:{" "}
+              <span
+                className={`font-semibold ${
+                  aiReasoning.sentiment === "positive"
+                    ? "text-green-600"
+                    : aiReasoning.sentiment === "negative"
+                      ? "text-red-600"
+                      : "text-yellow-600"
+                }`}
+              >
+                {aiReasoning.sentiment}
+              </span>
+            </p>
+          </div>
+        )}
+      </CardContent>
+      {aiReasoning && (
+        <CardFooter className="flex justify-between">
+          <Button onClick={handleTryAgain} variant="outline">
+            Try Again
+          </Button>
+          <Button onClick={handleSaveAIReasoning} disabled={savePending}>
+            {savePending ? "Saving..." : "Save AI Reasoning"}
           </Button>
         </CardFooter>
       )}

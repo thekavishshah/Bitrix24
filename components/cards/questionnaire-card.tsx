@@ -1,52 +1,107 @@
+"use client";
+
 import {
   Card,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ExternalLink } from "lucide-react";
+import { Questionnaire } from "@prisma/client";
+import {
+  CalendarIcon,
+  LinkIcon,
+  Notebook,
+  Trash2,
+  UserIcon,
+} from "lucide-react";
+import { Button } from "../ui/button";
+import { useTransition } from "react";
+import { useToast } from "@/hooks/use-toast";
+import DeleteBaseline from "@/app/actions/delete-baseline";
 
-interface QuestionnaireInfo {
-  title: string;
-  author: string;
-  version?: string;
-  purpose?: string;
-  url: string;
+interface QuestionnaireCardProps {
+  questionnaire: Questionnaire;
 }
 
-export default function QuestionnaireCard(info: QuestionnaireInfo) {
+const QuestionnaireCard: React.FC<QuestionnaireCardProps> = ({
+  questionnaire,
+}) => {
+  const [isPending, startTransition] = useTransition();
+  const { toast } = useToast();
+
+  const handleDelete = async () => {
+    startTransition(async () => {
+      // delete questionnaire
+      const response = await DeleteBaseline(
+        questionnaire.fileUrl,
+        questionnaire.id,
+      );
+
+      if (response.type === "success") {
+        toast({
+          title: "Questionnaire deleted",
+          description: "The questionnaire has been successfully deleted.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: response.message || "Failed to delete questionnaire",
+          variant: "destructive",
+        });
+      }
+    });
+  };
+
   return (
-    <Card className="mx-auto w-full">
+    <Card className="bg-muted">
       <CardHeader>
-        <CardTitle className="text-xl font-bold">{info.title}</CardTitle>
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>{info.author}</span>
-          {info.version && <Badge variant="secondary">v{info.version}</Badge>}
-        </div>
+        <CardTitle>{questionnaire.title}</CardTitle>
+        <CardDescription>{questionnaire.purpose}</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div>
-          <h3 className="mb-1 font-semibold">Date Created</h3>
-          <p className="text-sm text-muted-foreground">{"something"}</p>
-        </div>
-        {info.purpose && (
-          <div>
-            <h3 className="mb-1 font-semibold">Purpose</h3>
-            <p className="text-sm text-muted-foreground">{info.purpose}</p>
+      <CardContent>
+        <div className="space-y-2 text-sm">
+          <div className="flex items-center">
+            <LinkIcon className="mr-2 h-4 w-4" />
+            <a
+              href={questionnaire.fileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 hover:underline"
+            >
+              View Questionnaire
+            </a>
           </div>
-        )}
+          <div className="flex items-center">
+            <UserIcon className="mr-2 h-4 w-4" />
+            <span>{questionnaire.author}</span>
+          </div>
+          <div className="flex items-center">
+            <Notebook className="mr-2 h-4 w-4" />
+            <span>{questionnaire.version}</span>
+          </div>
+          <div className="flex items-center">
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            <span>
+              {new Date(questionnaire.created_at).toLocaleDateString()}
+            </span>
+          </div>
+        </div>
       </CardContent>
       <CardFooter>
-        <Button className="w-full" variant="outline" asChild>
-          <a href={info.url} target="_blank" rel="noopener noreferrer">
-            <ExternalLink className="mr-2 h-4 w-4" />
-            View Questionnaire
-          </a>
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={handleDelete}
+          disabled={isPending}
+        >
+          <Trash2 className="mr-2 h-4 w-4" />
+          {isPending ? "Deleting..." : "Delete"}
         </Button>
       </CardFooter>
     </Card>
   );
-}
+};
+
+export default QuestionnaireCard;

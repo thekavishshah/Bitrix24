@@ -4,6 +4,8 @@ import { GeistSans } from "geist/font/sans";
 import "../globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import Image from "next/image";
+import { ThemeProvider } from "@/components/theme-provider";
+import { ClerkProvider } from "@clerk/nextjs";
 
 export const metadata: Metadata = {
   title: "Dark Alpha Capital Deal Sourcing Organization",
@@ -17,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={cn(GeistSans.variable)}>
-      <body className={` antialiased`}>
+      <body className={`antialiased`}>
         <main>
           <section className="grid min-h-screen grid-cols-1 md:grid-cols-2">
             <div className="relative">

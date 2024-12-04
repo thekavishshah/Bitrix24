@@ -1,11 +1,12 @@
 "use server";
 
-import { auth } from "@/auth";
 import {
   NewDealFormSchema,
   NewDealFormSchemaType,
 } from "@/components/forms/new-deal-form";
 import { db } from "@/lib/firebase/init";
+import prismaDB from "@/lib/prisma";
+import { DealType } from "@prisma/client";
 import {
   addDoc,
   collection,
@@ -29,30 +30,21 @@ import React from "react";
  *
  * @returns {Promise<void>} Returns a promise that resolves once the deal has been added to Firebase.
  */
-const DeleteDealFromFirebase = async (
-  collectionName: string,
-  dealId: string,
-) => {
-  const userSession = await auth();
-
-  if (!userSession) {
-    return {
-      type: "error",
-      message: "User not authenticated, cannot add Deal",
-    };
-  }
-
+const DeleteDealFromDB = async (dealType: DealType, dealId: string) => {
   try {
-    await deleteDoc(doc(db, collectionName, dealId));
+    await prismaDB.deal.delete({
+      where: {
+        id: dealId,
+      },
+    });
 
-    console.log("revalidating cache for ", collectionName);
-    if (collectionName === "deals") {
-      // because we are updating a deal, we need to revalidate the cache for the deal page
-      // for collection deals we have the route as /raw-deals/[dealId]
-      revalidatePath(`/raw-deals`);
-    } else {
-      // for rest we have the route as the collection Name itself
-      revalidatePath(`/${collectionName}`);
+    switch (dealType) {
+      case "MANUAL":
+        revalidatePath("/manual-deals");
+      case "SCRAPED":
+        revalidatePath("/raw-deals");
+      case "AI_INFERRED":
+        revalidatePath("/inferred-deals");
     }
 
     return {
@@ -64,15 +56,15 @@ const DeleteDealFromFirebase = async (
     if (error instanceof Error) {
       return {
         type: "error",
-        message: `Failed to add the deal: ${error.message}`,
+        message: `Failed to delete deal: ${error.message}`,
       };
     }
 
     return {
       type: "error",
-      message: "Failed to add the deal. Please try again.",
+      message: "Failed to delete deal. Please try again.",
     };
   }
 };
 
-export default DeleteDealFromFirebase;
+export default DeleteDealFromDB;

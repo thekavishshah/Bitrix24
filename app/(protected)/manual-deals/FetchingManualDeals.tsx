@@ -1,16 +1,21 @@
 "use client";
 
+import { ManualDeal, TransformedDeal } from "@/app/types";
 import InferredDealCard from "@/components/InferredDealCard";
 import ManualDealCard from "@/components/ManualDealCard";
 import DealCardSkeleton from "@/components/skeletons/DealCardSkeleton";
 import { Button } from "@/components/ui/button";
-import { fetchDocumentsWithPagination, SnapshotDeal } from "@/lib/firebase/db";
+import {
+  fetchDocumentsWithPagination,
+  fetchManualDealsWithPagination,
+  SnapshotDeal,
+} from "@/lib/firebase/db";
 import { PlusCircle } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const FetchingManualDeals = () => {
-  const [data, setData] = useState<SnapshotDeal[]>([]);
+  const [data, setData] = useState<ManualDeal[]>([]);
   const [page, setPage] = useState(1);
   const [isNextAvailable, setIsNextAvailable] = useState(false);
   const [isPreviousAvailable, setIsPreviousAvailable] = useState(false);
@@ -20,7 +25,7 @@ const FetchingManualDeals = () => {
     setLoading(true);
     const fetchData = async () => {
       console.log("fetching initial manual deals");
-      const documents = await fetchDocumentsWithPagination("manual-deals", 35);
+      const documents = await fetchManualDealsWithPagination(35);
 
       setLoading(false);
       console.log("fetchedDeals", documents);
@@ -30,18 +35,13 @@ const FetchingManualDeals = () => {
     fetchData();
   }, []);
 
-  const showNext = async (item: SnapshotDeal) => {
+  const showNext = async (item: ManualDeal) => {
     setLoading(true);
     if (data.length === 0) {
       alert("No more deals to show");
       setLoading(false);
     } else {
-      const nextItems = await fetchDocumentsWithPagination(
-        "manual-deals",
-        35,
-        "next",
-        item,
-      );
+      const nextItems = await fetchManualDealsWithPagination(35, "next", item);
       setLoading(false);
       if (nextItems.length > 0) {
         setData(nextItems);
@@ -52,10 +52,9 @@ const FetchingManualDeals = () => {
     }
   };
 
-  const showPrevious = async (item: SnapshotDeal) => {
+  const showPrevious = async (item: ManualDeal) => {
     setLoading(true);
-    const previousItems = await fetchDocumentsWithPagination(
-      "manual-deals",
+    const previousItems = await fetchManualDealsWithPagination(
       35,
       "previous",
       item,
@@ -71,6 +70,26 @@ const FetchingManualDeals = () => {
 
   return (
     <div>
+      <div className="my-4 w-full justify-end space-x-2">
+        <Button
+          onClick={() => {
+            showPrevious(data[0] as ManualDeal);
+          }}
+          disabled={!isPreviousAvailable}
+        >
+          Previous
+        </Button>
+
+        <Button
+          onClick={() => {
+            showNext(data[data.length - 1] as ManualDeal);
+          }}
+          disabled={!isNextAvailable}
+        >
+          Next
+        </Button>
+      </div>
+
       {loading ? (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           <DealCardSkeleton />
@@ -83,18 +102,19 @@ const FetchingManualDeals = () => {
           <DealCardSkeleton />
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="blog-index">
           {data.length > 0 ? (
             data.map((e) => {
               console.log("manual deal", e);
               return (
                 <ManualDealCard
                   key={e.id}
+                  dealCaption={e.deal_caption}
                   dealId={e.id}
-                  title={e.title}
-                  ebitda={e.revenue}
-                  category={e.category}
-                  asking_price={e.asking_price}
+                  industry={e.industry}
+                  brokerage={e.brokerage}
+                  ebitda={e.ebitda}
+                  revenue={e.revenue}
                 />
               );
             })
@@ -111,26 +131,6 @@ const FetchingManualDeals = () => {
           )}
         </div>
       )}
-
-      <div className="mt-4 w-full justify-end space-x-2">
-        <Button
-          onClick={() => {
-            showPrevious(data[0] as SnapshotDeal);
-          }}
-          disabled={!isPreviousAvailable}
-        >
-          Previous
-        </Button>
-
-        <Button
-          onClick={() => {
-            showNext(data[data.length - 1] as SnapshotDeal);
-          }}
-          disabled={!isNextAvailable}
-        >
-          Next
-        </Button>
-      </div>
     </div>
   );
 };

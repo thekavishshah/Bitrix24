@@ -71,9 +71,29 @@ const FetchingInferredDeals = () => {
 
   return (
     <div>
+      <div className="my-4 w-full justify-end space-x-2">
+        <Button
+          onClick={() => {
+            showPrevious(data[0] as SnapshotDeal);
+          }}
+          disabled={!isPreviousAvailable}
+        >
+          Previous
+        </Button>
+
+        <Button
+          onClick={() => {
+            showNext(data[data.length - 1] as SnapshotDeal);
+          }}
+          disabled={!isNextAvailable}
+        >
+          Next
+        </Button>
+      </div>
+
       <div>
         {loading ? (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="blog-index">
             <DealCardSkeleton />
             <DealCardSkeleton />
             <DealCardSkeleton />
@@ -84,7 +104,7 @@ const FetchingInferredDeals = () => {
             <DealCardSkeleton />
           </div> // Replace with a spinner or skeleton if preferred
         ) : (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="blog-index">
             {data.length > 0 ? (
               data.map((e) => (
                 <InferredDealCard
@@ -106,26 +126,6 @@ const FetchingInferredDeals = () => {
             )}
           </div>
         )}
-      </div>
-
-      <div className="mt-4 w-full justify-end space-x-2">
-        <Button
-          onClick={() => {
-            showPrevious(data[0] as SnapshotDeal);
-          }}
-          disabled={!isPreviousAvailable}
-        >
-          Previous
-        </Button>
-
-        <Button
-          onClick={() => {
-            showNext(data[data.length - 1] as SnapshotDeal);
-          }}
-          disabled={!isNextAvailable}
-        >
-          Next
-        </Button>
       </div>
     </div>
   );
