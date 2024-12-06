@@ -1,5 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import React from "react";
+import React from "react"
 
 const LoadingSkeleton = () => {
   return (
