@@ -48,8 +48,8 @@ export const columns: ColumnDef<Payment>[] = [
   },
 
   {
-    accessorKey: "status",
-    header: "Status",
+    accessorKey: "name",
+    header: "Name",
   },
   {
     accessorKey: "email",
