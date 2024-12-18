@@ -19,7 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 interface AIReasoningProps {
   title: string;
   explanation: string;
-  sentiment: "positive" | "neutral" | "negative";
+  sentiment: "POSITIVE" | "NEUTRAL" | "NEGATIVE";
 }
 
 export default function ScreenDealComponent({
@@ -52,8 +52,24 @@ export default function ScreenDealComponent({
       formData.append("dealId", dealId);
 
       try {
-        const result = await screenDeal(formData);
-        setAiReasoning(result);
+        const response = await screenDeal(formData);
+        if (response.type === "success") {
+          setAiReasoning(response.result!);
+          toast({
+            title: "Successfully Screened Deal",
+            description: response.message || "Deal was screened successfully!",
+          });
+        }
+
+        if (response.type === "error") {
+          toast({
+            title: "Error Screening Deal ☠️",
+            variant: "destructive",
+            description:
+              response.message ||
+              "An error occurred, Please try again later!!!!",
+          });
+        }
       } catch (error) {
         console.error("Error screening deal:", error);
       } finally {
@@ -125,12 +141,12 @@ export default function ScreenDealComponent({
             <h3 className="text-lg font-semibold">{aiReasoning.title}</h3>
             <p className="whitespace-pre-wrap">{aiReasoning.explanation}</p>
             <p>
-              Sentiment:{" "}
+              Sentiment:
               <span
                 className={`font-semibold ${
-                  aiReasoning.sentiment === "positive"
+                  aiReasoning.sentiment === "POSITIVE"
                     ? "text-green-600"
-                    : aiReasoning.sentiment === "negative"
+                    : aiReasoning.sentiment === "NEGATIVE"
                       ? "text-red-600"
                       : "text-yellow-600"
                 }`}

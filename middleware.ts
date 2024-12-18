@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
-import { auth } from "./auth";
 import {
   AUTH_ROUTES,
   DEFAULT_LOGIN_REDIRECT,
   PROTECTED_BASE_ROUTES,
   PROTECTED_ROUTES,
 } from "./routes";
+import authConfig from "./auth.config";
+import NextAuth from "next-auth";
+
+// 2. Wrapped middleware option
+const { auth } = NextAuth(authConfig);
 
 export default auth((req) => {
   // Your custom middleware logic goes here

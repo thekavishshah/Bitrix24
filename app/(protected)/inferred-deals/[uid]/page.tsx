@@ -219,7 +219,7 @@ const InferredDealSpecificPage = async (props: { params: Params }) => {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>AI Reasoning</CardTitle>
             <Button variant="outline" size="sm" asChild>
-              <Link href={`/manual-deals/${id}/screen`}>
+              <Link href={`/inferred-deals/${id}/screen`}>
                 <Plus className="mr-2 h-4 w-4" /> Add AI Reasoning
               </Link>
             </Button>

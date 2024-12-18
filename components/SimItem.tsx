@@ -1,7 +1,13 @@
 "use client";
 
-import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useTransition } from "react";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "./ui/button";
 import { Trash2 } from "lucide-react";
@@ -15,6 +21,7 @@ interface SimItemProps {
   status: string;
   cimId: string;
   dealId: string;
+  fileUrl: string;
   dealType: DealType;
 }
 
@@ -24,9 +31,11 @@ const SimItem: React.FC<SimItemProps> = ({
   status,
   cimId,
   dealId,
+  fileUrl,
   dealType,
 }) => {
   const { toast } = useToast();
+  const [isPending, startTransition] = useTransition();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -42,19 +51,30 @@ const SimItem: React.FC<SimItemProps> = ({
   };
 
   return (
-    <Card className="mb-4">
+    <Card className="mb-4 bg-muted">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+        <CardTitle className="">{title}</CardTitle>
         <div className="flex items-center space-x-2">
           <Badge variant="secondary" className={getStatusColor(status)}>
             {status}
           </Badge>
-          <Button
-            variant="destructive"
-            size="icon"
-            onClick={async () => {
-              // delete SIM
-              const response = await DeleteSimFromDB(cimId, dealType, dealId);
+        </div>
+      </CardHeader>
+      <CardContent>
+        <p className="">{description}</p>
+      </CardContent>
+      <CardFooter className="space-x-2">
+        <Button>Edit</Button>
+        <Button
+          variant={"destructive"}
+          onClick={async () => {
+            startTransition(async () => {
+              const response = await DeleteSimFromDB(
+                cimId,
+                dealType,
+                dealId,
+                fileUrl,
+              );
               if (response.type === "success") {
                 toast({
                   title: "SIM deleted successfully",
@@ -69,16 +89,12 @@ const SimItem: React.FC<SimItemProps> = ({
                   variant: "destructive",
                 });
               }
-            }}
-            aria-label="Delete SIM"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm text-muted-foreground">{description}</p>
-      </CardContent>
+            });
+          }}
+        >
+          {isPending ? "Deleting......" : "Delete"}
+        </Button>
+      </CardFooter>
     </Card>
   );
 };

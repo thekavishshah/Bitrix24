@@ -14,7 +14,7 @@ export type CimFormValues = z.infer<typeof cimFormSchema>;
 export const screenDealSchema = z.object({
   title: z.string(),
   explanation: z.string(),
-  sentiment: z.enum(["positive", "neutral", "negative"]),
+  sentiment: z.enum(["POSITIVE", "NEUTRAL", "NEGATIVE"]),
 });
 
 export type screenDealSchemaType = z.infer<typeof screenDealSchema>;

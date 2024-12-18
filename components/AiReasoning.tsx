@@ -11,10 +11,11 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
 import DeleteAIScreeningFromDB from "@/app/actions/delete-ai-screening";
-import { DealType } from "@prisma/client";
+import { DealType, Sentiment } from "@prisma/client";
 import { useToast } from "@/hooks/use-toast";
 import { Trash2 } from "lucide-react";
 import { useTransition } from "react";
+import EditScreeningResultDialog from "./Dialogs/edit-screen-result-dialog";
 
 interface AIReasoningProps {
   screeningId: string;
@@ -22,7 +23,7 @@ interface AIReasoningProps {
   dealId: string;
   dealType: DealType;
   explanation: string;
-  sentiment: string;
+  sentiment: Sentiment;
 }
 
 export default function AIReasoning({
@@ -37,12 +38,12 @@ export default function AIReasoning({
   const [isPending, startTransition] = useTransition();
 
   return (
-    <Card className="mb-4">
+    <Card className="mb-4 bg-muted">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         <Badge
           className={cn({
-            "": sentiment === "positive",
+            "": sentiment === "POSITIVE",
           })}
         >
           {sentiment}
@@ -53,7 +54,7 @@ export default function AIReasoning({
           {explanation}
         </p>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="space-x-2">
         <Button
           variant="destructive"
           onClick={async () => {
@@ -85,6 +86,14 @@ export default function AIReasoning({
         >
           {isPending ? "Deleting..." : "Delete"}
         </Button>
+        <EditScreeningResultDialog
+          screeningId={screeningId}
+          title={title}
+          sentiment={sentiment}
+          explanation={explanation}
+          dealId={dealId}
+          dealType={dealType}
+        />
       </CardFooter>
     </Card>
   );

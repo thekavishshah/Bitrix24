@@ -65,14 +65,18 @@ const ScreenManualDealPage = async (props: { params: Params }) => {
   } = fetchedDeal;
 
   return (
-    <section className="block-space relative">
-      <div className="absolute left-8 top-6">
-        <PreviousPageButton />
-      </div>
-      <div className="narrow-container mb-8 md:mb-10 lg:mb-12">
-        <h1 className="mb-4 text-center text-4xl font-bold">
-          Screen Deal: {title}
-        </h1>
+    <section className="block-space big-container">
+      <div className="grid grid-cols-1 md:grid-cols-2">
+        <div>
+          <PreviousPageButton />
+          <h2 className="mb-4">Screen this Deal</h2>
+          <p>
+            Lorem ipsum dolor, sit amet consectetur adipisicing elit. Hic cumque
+            atque sed perspiciatis vero a, est optio magnam nulla ad doloremque
+            incidunt quasi ipsa repellendus voluptate modi provident ut
+            obcaecati?
+          </p>
+        </div>
         <ScreenDealComponent dealId={uid} dealType={dealType} />
       </div>
     </section>

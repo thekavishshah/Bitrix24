@@ -1,3 +1,4 @@
+import { auth } from "@/auth";
 import { Button } from "@/components/ui/button";
 import {
   ArrowRight,
@@ -13,7 +14,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-const Home = () => {
+const Home = async () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}

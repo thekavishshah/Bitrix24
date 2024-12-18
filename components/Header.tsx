@@ -20,18 +20,25 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "./mode-toggle";
 import { Session } from "next-auth";
 import { signOut, useSession } from "next-auth/react";
+import { IconType } from "react-icons/lib";
 
 type HeaderProps = {
   className?: string;
   session: Session | null;
 };
 
-export const NavLinks = [
+type NavLinkType = {
+  navlink: string;
+  navlabel: string;
+  icon: any;
+}[];
+
+export const NavLinks: NavLinkType = [
   { navlink: "/new-deal", navlabel: "New", icon: FiPlus },
   { navlink: "/raw-deals", navlabel: "Raw", icon: FiList },
   { navlink: "/published-deals", navlabel: "Published", icon: FiCheckSquare },
@@ -53,6 +60,12 @@ const Header = ({ className, session }: HeaderProps) => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Add admin-specific link if user is an admin
+  const isAdmin = session?.user?.role === "ADMIN";
+  const dynamicNavLinks = isAdmin
+    ? [...NavLinks, { navlink: "/admin", navlabel: "Admin", icon: Lock }]
+    : NavLinks;
 
   return (
     <header
@@ -76,14 +89,19 @@ const Header = ({ className, session }: HeaderProps) => {
               <MdMenu className="h-6 w-6" />
             </Button>
           </div>
-          <DesktopMenu pathname={pathname} />
+          <DesktopMenu pathname={pathname} dyanmicLinks={dynamicNavLinks} />
           <div className="flex items-center space-x-4">
             {session ? <ProfileMenu session={session} /> : <AuthDialogNavs />}
             <ModeToggle />
           </div>
         </ul>
       </nav>
-      <MobileMenu isOpen={isOpen} setIsOpen={setIsOpen} pathname={pathname} />
+      <MobileMenu
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        pathname={pathname}
+        dyanmicLinks={dynamicNavLinks}
+      />
     </header>
   );
 };
@@ -102,10 +120,16 @@ function NameLogo() {
   );
 }
 
-function DesktopMenu({ pathname }: { pathname: string }) {
+function DesktopMenu({
+  pathname,
+  dyanmicLinks,
+}: {
+  pathname: string;
+  dyanmicLinks: NavLinkType;
+}) {
   return (
     <div className="hidden space-x-1 md:flex">
-      {NavLinks.map((item, index) => (
+      {dyanmicLinks.map((item, index) => (
         <Link
           href={item.navlink}
           key={index}
@@ -128,10 +152,12 @@ function MobileMenu({
   isOpen,
   setIsOpen,
   pathname,
+  dyanmicLinks,
 }: {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   pathname: string;
+  dyanmicLinks: NavLinkType;
 }) {
   return (
     <div
@@ -154,7 +180,7 @@ function MobileMenu({
         </div>
         <nav className="mt-6">
           <ul className="space-y-2">
-            {NavLinks.map((item, index) => (
+            {dyanmicLinks.map((item, index) => (
               <li key={index}>
                 <Link
                   href={item.navlink}
@@ -188,6 +214,7 @@ function AuthDialogNavs() {
 
 function ProfileMenu({ session }: { session: Session }) {
   const router = useRouter();
+  console.log("session", session);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="flex items-center gap-2">

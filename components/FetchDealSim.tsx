@@ -32,6 +32,7 @@ const FetchDealSim = async ({
             cimId={sim.id}
             dealId={dealId}
             dealType={dealType}
+            fileUrl={sim.fileUrl}
           />
         ))
       ) : (

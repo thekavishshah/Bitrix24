@@ -22,6 +22,7 @@ export const PROTECTED_ROUTES = [
   "/manual-deals",
   "/published-deals",
   "/infer",
+  "/admin",
 ];
 
 export const PROTECTED_BASE_ROUTES = [
@@ -29,6 +30,7 @@ export const PROTECTED_BASE_ROUTES = [
   "/manual-deals",
   "/published-deals",
   "/inferred-deals",
+  "/admin",
 ];
 
 /**

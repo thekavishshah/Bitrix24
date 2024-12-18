@@ -17,11 +17,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Deal } from "@prisma/client";
+import { Deal, UserRole } from "@prisma/client";
 import { useToast } from "@/hooks/use-toast";
 import DeleteDealFromDB from "@/app/actions/delete-deal";
 
-const DealCard = ({ deal }: { deal: Deal }) => {
+const DealCard = ({ deal, userRole }: { deal: Deal; userRole: UserRole }) => {
   let editLink = "";
   let detailLink = "";
   let screenLink = "";
@@ -100,23 +100,25 @@ const DealCard = ({ deal }: { deal: Deal }) => {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={handleDelete}
-                  >
-                    <Trash2 className="h-4 w-4 text-red-500" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Delete Deal</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            {userRole === "ADMIN" ? (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={handleDelete}
+                    >
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Delete Deal</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ) : null}
           </div>
         </div>
       </CardHeader>
