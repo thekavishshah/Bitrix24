@@ -13,17 +13,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
+import { User } from "@prisma/client";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import blockAccount from "@/app/actions/block-account";
+import unblockAccount from "@/app/actions/unblock-account";
 
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
-export type Payment = {
-  id: string;
-  amount: number;
-  status: "pending" | "processing" | "success" | "failed";
-  email: string;
-};
-
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef<User>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -66,22 +62,25 @@ export const columns: ColumnDef<Payment>[] = [
     },
   },
   {
-    accessorKey: "amount",
-    header: () => <div className="text-right">Amount</div>,
+    accessorKey: "role",
+    header: "Role",
+  },
+  {
+    accessorKey: "isBlocked",
+    header: "Blocked",
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("amount"));
-      const formatted = new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-      }).format(amount);
-
-      return <div className="text-right font-medium">{formatted}</div>;
+      const user = row.original;
+      return user.isBlocked ? (
+        <Badge>Yes</Badge>
+      ) : (
+        <Badge variant={"destructive"}>No</Badge>
+      );
     },
   },
   {
     id: "actions",
     cell: ({ row }) => {
-      const payment = row.original;
+      const user = row.original;
 
       return (
         <DropdownMenu>
@@ -94,13 +93,51 @@ export const columns: ColumnDef<Payment>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(payment.id)}
+              onClick={() => navigator.clipboard.writeText(user.id)}
             >
-              Copy payment ID
+              Copy Account ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View customer</DropdownMenuItem>
-            <DropdownMenuItem>View payment details</DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={async () => {
+                const userId = user.id;
+
+                try {
+                  await blockAccount(userId);
+                  alert("Account blocked successfully");
+                } catch (error) {
+                  alert("an error occurred");
+
+                  // toast({
+                  //   title: "Error while trying to block account",
+                  //   description: "Server Side Error Occurred",
+                  //   variant: "destructive", //
+                  // });
+                }
+              }}
+            >
+              Block Account
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={async () => {
+                const userId = user.id;
+
+                try {
+                  await unblockAccount(userId);
+                  alert("Account was given access");
+                } catch (error) {
+                  alert("an error occurred!!!");
+
+                  // toast({
+                  //   title: "Error while trying to block account",
+                  //   description: "Server Side Error Occurred",
+                  //   variant: "destructive", //
+                  // });
+                }
+              }}
+            >
+              Give Account Access
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

@@ -2,20 +2,8 @@ import getCurrentUserRole from "@/lib/data/current-user-role";
 import { redirect } from "next/navigation";
 import React from "react";
 import { DataTable } from "./data-table";
-import { Payment, columns } from "./columns";
-
-async function getData(): Promise<Payment[]> {
-  // Fetch data from your API here.
-  return [
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "m@example.com",
-    },
-    // ...
-  ];
-}
+import { columns } from "./columns";
+import prismaDB from "@/lib/prisma";
 
 const AdminPage = async () => {
   const currentUserRole = await getCurrentUserRole();
@@ -24,7 +12,8 @@ const AdminPage = async () => {
     redirect("/");
   }
 
-  const data = await getData();
+  const data = await prismaDB.user.findMany();
+  console.log(data);
 
   return (
     <>

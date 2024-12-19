@@ -3,6 +3,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import prismaDB from "./lib/prisma";
 import { User, UserRole } from "@prisma/client";
 import authConfig from "./auth.config";
+import { getCurrentUserByEmail } from "./lib/data/current-user";
 
 const adminEmails = [
   "rg5353070@gmail.com",
@@ -58,14 +59,32 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
       return session;
     },
-    async jwt({ token, user, account }) {
-      console.log("in jwt callback", { token, user, account });
+    async signIn({ user, account }) {
+      const userEmail = user.email;
+      const currentUser = await getCurrentUserByEmail(userEmail!);
 
+      if (currentUser?.isBlocked) {
+        return false;
+      }
+
+      return true;
+    },
+    async jwt({ token, user, account }) {
       if (!token.sub) return token;
 
-      if (token) {
-        const userRole = determineRole(token.email!);
+      // If there's a user object, it means the user signed in
+      // Update user role on every sign in
+      if (user) {
+        const userRole = determineRole(user.email!);
         token.role = userRole;
+        await prismaDB.user.update({
+          where: {
+            id: user.id,
+          },
+          data: {
+            role: userRole,
+          },
+        });
       }
 
       const existingUser = await prismaDB.user.findUnique({
