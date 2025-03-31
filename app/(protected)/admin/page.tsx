@@ -13,7 +13,6 @@ const AdminPage = async () => {
   }
 
   const data = await prismaDB.user.findMany();
-  console.log(data);
 
   return (
     <>
