@@ -75,6 +75,9 @@ model Deal {
   updatedAt       DateTime      @default(now()) @updatedAt
   SIM             SIM[]
   AiScreening     AiScreening[]
+
+  bitrixId        String?
+  bitrixCreatedAt DateTime?
 }
 
 model SIM {

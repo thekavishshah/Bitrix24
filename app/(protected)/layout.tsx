@@ -4,7 +4,7 @@ import "../globals.css";
 import { GeistSans } from "geist/font/sans";
 import { cn } from "@/lib/utils";
 import Header from "@/components/Header";
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "@/components/ui/sonner";
 import MenuDialog from "@/components/Dialogs/menu-dialog";
 import { ThemeProvider } from "@/components/theme-provider";
 import { auth } from "@/auth";

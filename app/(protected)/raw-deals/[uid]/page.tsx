@@ -15,18 +15,16 @@ import {
   Building,
   Percent,
   Plus,
+  Upload,
+  CheckCircle,
 } from "lucide-react";
 
-import { fetchSpecificManualDeal } from "@/lib/firebase/db";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import PreviousPageButton from "@/components/PreviousPageButton";
 import { DealDetailItem } from "@/components/DealDetailItem";
-import AIReasoning from "@/components/AiReasoning";
-import SimItem from "@/components/SimItem";
 import prismaDB from "@/lib/prisma";
 import SimUploadDialog from "@/components/Dialogs/sim-upload-dialog";
 import FetchDealSim from "@/components/FetchDealSim";
@@ -39,6 +37,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { exportDealToBitrix } from "@/app/actions/upload-bitrix";
+import { toast } from "sonner";
+import UploadDealToBitrixButton from "@/components/Buttons/upload-deal-bitrix-button";
 
 type Params = Promise<{ uid: string }>;
 
@@ -113,6 +114,7 @@ export default async function ManualDealSpecificPage(props: {
     askingPrice,
     grossRevenue,
     dealType,
+    bitrixId,
   } = fetchedDeal;
 
   return (
@@ -137,6 +139,13 @@ export default async function ManualDealSpecificPage(props: {
             <Edit className="mr-2 h-4 w-4" /> Edit Deal
           </Link>
         </Button>
+        {bitrixId ? (
+          <Badge variant="outline">
+            <CheckCircle className="mr-2 h-4 w-4" /> Deal Published to Bitrix
+          </Badge>
+        ) : (
+          <UploadDealToBitrixButton specificDeal={fetchedDeal} />
+        )}
         {sourceWebsite && (
           <Button asChild variant="outline">
             <Link href={sourceWebsite}>

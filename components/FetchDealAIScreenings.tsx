@@ -1,6 +1,5 @@
 import prismaDB from "@/lib/prisma";
 import React from "react";
-import SimItem from "@/components/SimItem";
 import { AlertTriangle } from "lucide-react";
 import { Button } from "./ui/button";
 import { DealType } from "@prisma/client";
