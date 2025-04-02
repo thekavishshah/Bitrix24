@@ -108,11 +108,7 @@ const EditDealForm = ({ deal }: EditDealFormProps) => {
   function onSubmit(values: EditDealFormSchemaType) {
     startTransition(async () => {
       console.log("values", values);
-      const response = await EditDealFromFirebase(
-        values,
-        deal.id,
-        deal.dealType,
-      );
+      const response = await EditDealFromFirebase(values, deal.id);
       if (response.type === "success") {
         toast({
           title: `Deal Edit successfully`,

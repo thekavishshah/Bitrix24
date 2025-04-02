@@ -28,7 +28,6 @@ import { revalidatePath } from "next/cache";
 export default async function EditDealFromFirebase(
   values: EditDealFormSchemaType,
   dealId: string,
-  dealType: DealType,
 ) {
   try {
     await prismaDB.deal.update({
@@ -55,14 +54,7 @@ export default async function EditDealFromFirebase(
       },
     });
 
-    switch (dealType) {
-      case "MANUAL":
-        revalidatePath(`/manual-deals/${dealId}`);
-      case "SCRAPED":
-        revalidatePath(`/raw-deals/${dealId}`);
-      case "AI_INFERRED":
-        revalidatePath(`/inferred-deals/${dealId}`);
-    }
+    revalidatePath(`/raw-deals/${dealId}`);
 
     return {
       type: "success",

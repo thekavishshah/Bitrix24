@@ -6,8 +6,6 @@ import { revalidatePath } from "next/cache";
 
 export default async function AddScreeningBaseline(values: FormData) {
   try {
-    console.log("in add baseline to firebase", values);
-
     const questionnaire = values.get("questionnaire") as File;
     const title = values.get("title") as string;
     const purpose = values.get("purpose") as string;
@@ -29,8 +27,6 @@ export default async function AddScreeningBaseline(values: FormData) {
         version,
       },
     });
-
-    console.log("Document written with ID: ", docRef.id);
 
     revalidatePath("/questionnaires");
 

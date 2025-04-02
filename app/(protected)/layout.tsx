@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/toaster";
 import MenuDialog from "@/components/Dialogs/menu-dialog";
 import { ThemeProvider } from "@/components/theme-provider";
 import { auth } from "@/auth";
+import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "Dark Alpha Capital Deal Sourcing Organization",
@@ -35,6 +36,7 @@ export default async function RootLayout({
             <Header session={userSession} />
 
             {children}
+            <Footer />
           </main>
           <Toaster />
         </ThemeProvider>

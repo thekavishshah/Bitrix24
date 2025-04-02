@@ -42,8 +42,6 @@ export const NavLinks: NavLinkType = [
   { navlink: "/new-deal", navlabel: "New", icon: FiPlus },
   { navlink: "/raw-deals", navlabel: "Raw", icon: FiList },
   { navlink: "/published-deals", navlabel: "Published", icon: FiCheckSquare },
-  { navlink: "/manual-deals", navlabel: "Manual", icon: FiEdit },
-  { navlink: "/inferred-deals", navlabel: "Inferred", icon: FiTrendingUp },
   { navlink: "/infer", navlabel: "Infer", icon: FiSearch },
 ];
 
@@ -92,7 +90,6 @@ const Header = ({ className, session }: HeaderProps) => {
           <DesktopMenu pathname={pathname} dyanmicLinks={dynamicNavLinks} />
           <div className="flex items-center space-x-4">
             {session ? <ProfileMenu session={session} /> : <AuthDialogNavs />}
-            <ModeToggle />
           </div>
         </ul>
       </nav>

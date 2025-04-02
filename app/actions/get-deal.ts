@@ -20,15 +20,42 @@ export default async function GetDeals({
   limit?: number;
   dealType: DealType;
 }): Promise<GetDealsResult> {
-  const data = await prismaDB.deal.findMany({
-    where: { dealType, dealCaption: { contains: search } },
-    skip: offset,
-    take: limit,
-  });
+  const [data, totalCount] = await Promise.all([
+    prismaDB.deal.findMany({
+      where: { dealType, dealCaption: { contains: search } },
+      skip: offset,
+      take: limit,
+    }),
 
-  const totalCount = await prismaDB.deal.count({
-    where: { dealType, dealCaption: { contains: search } },
-  });
+    prismaDB.deal.count({
+      where: { dealType, dealCaption: { contains: search } },
+    }),
+  ]);
+
+  const totalPages = Math.ceil(totalCount / limit);
+
+  return { data, totalCount, totalPages };
+}
+
+export async function GetAllDeals({
+  search,
+  offset = 0,
+  limit = 20,
+}: {
+  search?: string | undefined;
+  offset?: number;
+  limit?: number;
+}): Promise<GetDealsResult> {
+  const [data, totalCount] = await Promise.all([
+    prismaDB.deal.findMany({
+      where: { dealCaption: { contains: search } },
+      skip: offset,
+      take: limit,
+    }),
+    prismaDB.deal.count({
+      where: { dealCaption: { contains: search } },
+    }),
+  ]);
 
   const totalPages = Math.ceil(totalCount / limit);
 
