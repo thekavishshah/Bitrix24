@@ -10,7 +10,14 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { DollarSign, Edit, Trash2, MapPin, Briefcase } from "lucide-react";
+import {
+  DollarSign,
+  Edit,
+  Trash2,
+  MapPin,
+  Briefcase,
+  Type,
+} from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -127,6 +134,11 @@ const DealCard = ({
           icon={<DollarSign className="h-4 w-4 text-emerald-500" />}
           label="Revenue"
           value={formatCurrency(deal.revenue)}
+        />
+        <InfoItem
+          icon={<Type className="h-4 w-4 text-emerald-500" />}
+          label="DealType"
+          value={deal.dealType}
         />
         <InfoItem
           icon={<DollarSign className="h-4 w-4 text-blue-500" />}

@@ -1,7 +1,9 @@
 "use server";
+import "server-only";
 
 import prismaDB from "@/lib/prisma";
 import { Deal, DealType } from "@prisma/client";
+import { unstable_cache } from "next/cache";
 
 interface GetDealsResult {
   data: Deal[];
@@ -47,39 +49,40 @@ export default async function GetDeals({
  * @param dealTypes - deal types
  * @returns
  */
-export async function GetAllDeals({
-  search,
-  offset = 0,
-  limit = 20,
-  dealTypes,
-}: {
-  search?: string | undefined;
-  offset?: number;
-  limit?: number;
-  dealTypes?: DealType[];
-}): Promise<GetDealsResult> {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  // console.log("dealTypes", dealTypes);
+export const GetAllDeals = unstable_cache(
+  async ({
+    search,
+    offset = 0,
+    limit = 20,
+    dealTypes,
+  }: {
+    search?: string | undefined;
+    offset?: number;
+    limit?: number;
+    dealTypes?: DealType[];
+  }): Promise<GetDealsResult> => {
+    const whereClause = {
+      ...(search ? { dealCaption: { contains: search } } : {}),
+      ...(dealTypes && dealTypes.length > 0
+        ? { dealType: { in: dealTypes } }
+        : {}),
+    };
 
-  const whereClause = {
-    ...(search ? { dealCaption: { contains: search } } : {}),
-    ...(dealTypes && dealTypes.length > 0
-      ? { dealType: { in: dealTypes } }
-      : {}),
-  };
+    const [data, totalCount] = await Promise.all([
+      prismaDB.deal.findMany({
+        where: whereClause,
+        skip: offset,
+        take: limit,
+      }),
+      prismaDB.deal.count({
+        where: whereClause,
+      }),
+    ]);
 
-  const [data, totalCount] = await Promise.all([
-    prismaDB.deal.findMany({
-      where: whereClause,
-      skip: offset,
-      take: limit,
-    }),
-    prismaDB.deal.count({
-      where: whereClause,
-    }),
-  ]);
+    const totalPages = Math.ceil(totalCount / limit);
 
-  const totalPages = Math.ceil(totalCount / limit);
-
-  return { data, totalCount, totalPages };
-}
+    return { data, totalCount, totalPages };
+  },
+  ["deals"],
+  { revalidate: 30, tags: ["deals"] },
+);

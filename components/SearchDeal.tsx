@@ -40,7 +40,10 @@ export default function SearchDeals() {
   };
 
   return (
-    <div className="relative flex h-8 items-center">
+    <div
+      className="relative flex h-8 items-center"
+      data-pending={isSearching ? "" : undefined}
+    >
       {isSearching ? (
         <Loader2 className="absolute left-2 top-2 size-4 animate-spin text-muted-foreground" />
       ) : (

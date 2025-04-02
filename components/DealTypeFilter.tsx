@@ -1,15 +1,17 @@
 "use client";
 
-import React, { useTransition } from "react";
+import React, { useOptimistic, useTransition } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Value } from "@radix-ui/react-select";
 
 const DealTypeFilter = () => {
   const searchParams = useSearchParams();
-  const selectedDealTypes = searchParams.getAll("dealType");
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [selectedDealTypes, setSelectedDealTypes] = useOptimistic(
+    searchParams.getAll("dealType"),
+  );
 
   return (
     <div
@@ -26,6 +28,7 @@ const DealTypeFilter = () => {
             value.forEach((e) => {
               return params.append("dealType", e);
             });
+            setSelectedDealTypes(value);
             router.push(`?${params.toString()}`, {
               scroll: false,
             });
