@@ -8,6 +8,8 @@ import GetDeals, { GetAllDeals } from "@/app/actions/get-deal";
 import SearchDeals from "@/components/SearchDeal";
 import Pagination from "@/components/pagination";
 import { setTimeout } from "timers/promises";
+import DealTypeFilter from "@/components/DealTypeFilter";
+import { DealType } from "@prisma/client";
 
 export const metadata: Metadata = {
   title: "Inferred Deals",
@@ -24,16 +26,25 @@ const RawDealsPage = async (props: { searchParams: SearchParams }) => {
   const limit = Number(searchParams?.limit) || 20;
   const offset = (currentPage - 1) * limit;
 
+  // Ensure dealTypes is always an array
+  const dealTypes =
+    typeof searchParams?.dealType === "string"
+      ? [searchParams.dealType]
+      : searchParams?.dealType || [];
+
+  console.log("dealTypes", dealTypes);
+
   const { data, totalPages, totalCount } = await GetAllDeals({
     search,
     offset,
     limit,
+    dealTypes: dealTypes as DealType[],
   });
 
   const currentUserRole = await getCurrentUserRole();
 
   return (
-    <section className="block-space container">
+    <section className="block-space group container">
       <div className="mb-8 text-center">
         <h1 className="mb-4 text-4xl font-bold md:mb-6 lg:mb-8">Raw Deals</h1>
         <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
@@ -57,21 +68,24 @@ const RawDealsPage = async (props: { searchParams: SearchParams }) => {
           <SearchDeals />
           <Pagination totalPages={totalPages} />
         </div>
+        <DealTypeFilter />
       </div>
 
-      {data.length === 0 ? (
-        <div className="mt-12 text-center">
-          <p className="text-xl text-muted-foreground">
-            No deals found matching your criteria.
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {data.map((e) => (
-            <DealCard key={e.id} deal={e} userRole={currentUserRole!} />
-          ))}
-        </div>
-      )}
+      <div className="group-has-[[data-pending]]:animate-pulse">
+        {data.length === 0 ? (
+          <div className="mt-12 text-center">
+            <p className="text-xl text-muted-foreground">
+              No deals found matching your criteria.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {data.map((e) => (
+              <DealCard key={e.id} deal={e} userRole={currentUserRole!} />
+            ))}
+          </div>
+        )}
+      </div>
     </section>
   );
 };

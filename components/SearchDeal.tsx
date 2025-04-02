@@ -21,7 +21,6 @@ export default function SearchDeals() {
 
   const handleSearch = useDebouncedCallback((query: string) => {
     startTransition(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
       const params = new URLSearchParams(searchParams);
       if (query) {
         params.set("query", query);
