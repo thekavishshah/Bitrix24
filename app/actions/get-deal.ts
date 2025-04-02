@@ -49,40 +49,46 @@ export default async function GetDeals({
  * @param dealTypes - deal types
  * @returns
  */
-export const GetAllDeals = unstable_cache(
-  async ({
-    search,
-    offset = 0,
-    limit = 20,
-    dealTypes,
-  }: {
-    search?: string | undefined;
-    offset?: number;
-    limit?: number;
-    dealTypes?: DealType[];
-  }): Promise<GetDealsResult> => {
-    const whereClause = {
-      ...(search ? { dealCaption: { contains: search } } : {}),
-      ...(dealTypes && dealTypes.length > 0
-        ? { dealType: { in: dealTypes } }
-        : {}),
-    };
+export const GetAllDeals = async ({
+  search,
+  offset = 0,
+  limit = 20,
+  dealTypes,
+  ebitda,
+}: {
+  search?: string | undefined;
+  offset?: number;
+  limit?: number;
+  dealTypes?: DealType[];
+  ebitda?: string;
+}): Promise<GetDealsResult> => {
+  const ebitdaValue = ebitda ? parseFloat(ebitda) : undefined;
 
-    const [data, totalCount] = await Promise.all([
-      prismaDB.deal.findMany({
-        where: whereClause,
-        skip: offset,
-        take: limit,
-      }),
-      prismaDB.deal.count({
-        where: whereClause,
-      }),
-    ]);
+  const whereClause = {
+    ...(search ? { dealCaption: { contains: search } } : {}),
+    ...(dealTypes && dealTypes.length > 0
+      ? { dealType: { in: dealTypes } }
+      : {}),
+    ...(ebitdaValue !== undefined ? { ebitda: { gte: ebitdaValue } } : {}),
+  };
 
-    const totalPages = Math.ceil(totalCount / limit);
+  console.log("whereClause", whereClause);
 
-    return { data, totalCount, totalPages };
-  },
-  ["deals"],
-  { revalidate: 30, tags: ["deals"] },
-);
+  const [data, totalCount] = await Promise.all([
+    prismaDB.deal.findMany({
+      where: whereClause,
+      skip: offset,
+      take: limit,
+      orderBy: {
+        createdAt: "desc",
+      },
+    }),
+    prismaDB.deal.count({
+      where: whereClause,
+    }),
+  ]);
+
+  const totalPages = Math.ceil(totalCount / limit);
+
+  return { data, totalCount, totalPages };
+};

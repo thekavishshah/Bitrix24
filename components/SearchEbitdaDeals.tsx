@@ -10,23 +10,23 @@ import { useDebouncedCallback } from "use-debounce";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-export default function SearchDeals() {
+export default function SearchEbitdaDeals() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
   const [isSearching, startTransition] = useTransition();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const q = searchParams.get("query")?.toString();
+  const q = searchParams.get("ebitda")?.toString();
 
   const handleSearch = useDebouncedCallback((query: string) => {
     startTransition(async () => {
       const params = new URLSearchParams(searchParams);
       if (query) {
-        params.set("query", query);
+        params.set("ebitda", query);
         params.set("page", "1");
       } else {
-        params.delete("query");
+        params.delete("ebitda");
       }
       replace(`${pathname}?${params.toString()}`);
     });
@@ -51,7 +51,8 @@ export default function SearchDeals() {
       )}
       <Input
         className="h-8 w-[160px] pl-8 lg:w-[250px]"
-        placeholder="Search using deal caption..."
+        type="number"
+        placeholder="Enter EBITDA value"
         onChange={(e) => {
           handleSearch(e.target.value);
         }}

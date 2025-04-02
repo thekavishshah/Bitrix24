@@ -10,6 +10,8 @@ import Pagination from "@/components/pagination";
 import { setTimeout } from "timers/promises";
 import DealTypeFilter from "@/components/DealTypeFilter";
 import { DealType } from "@prisma/client";
+import SearchDealsSkeleton from "@/components/skeletons/SearchDealsSkeleton";
+import SearchEbitdaDeals from "@/components/SearchEbitdaDeals";
 
 export const metadata: Metadata = {
   title: "Inferred Deals",
@@ -26,6 +28,8 @@ const RawDealsPage = async (props: { searchParams: SearchParams }) => {
   const limit = Number(searchParams?.limit) || 20;
   const offset = (currentPage - 1) * limit;
 
+  const ebitda = searchParams?.ebitda || "";
+
   // Ensure dealTypes is always an array
   const dealTypes =
     typeof searchParams?.dealType === "string"
@@ -33,12 +37,14 @@ const RawDealsPage = async (props: { searchParams: SearchParams }) => {
       : searchParams?.dealType || [];
 
   console.log("dealTypes", dealTypes);
+  console.log("ebitda", ebitda);
 
   const { data, totalPages, totalCount } = await GetAllDeals({
     search,
     offset,
     limit,
     dealTypes: dealTypes as DealType[],
+    ebitda,
   });
 
   const currentUserRole = await getCurrentUserRole();
@@ -65,8 +71,12 @@ const RawDealsPage = async (props: { searchParams: SearchParams }) => {
         </div>
 
         <div className="flex flex-wrap items-center gap-4">
-          <SearchDeals />
-          <Pagination totalPages={totalPages} />
+          <Suspense fallback={<SearchDealsSkeleton />}>
+            <SearchDeals />
+          </Suspense>
+          <Suspense fallback={<SearchDealsSkeleton />}>
+            <SearchEbitdaDeals />
+          </Suspense>
         </div>
         <DealTypeFilter />
       </div>
@@ -86,6 +96,7 @@ const RawDealsPage = async (props: { searchParams: SearchParams }) => {
           </div>
         )}
       </div>
+      <Pagination totalPages={totalPages} />
     </section>
   );
 };
