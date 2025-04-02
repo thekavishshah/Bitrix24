@@ -133,7 +133,7 @@ export default async function ManualDealSpecificPage(props: {
 
       <div className="mb-8 flex flex-wrap justify-center gap-4">
         <Button asChild>
-          <Link href={`/manual-deals/${uid}/edit`}>
+          <Link href={`/raw-deals/${uid}/edit`}>
             <Edit className="mr-2 h-4 w-4" /> Edit Deal
           </Link>
         </Button>
@@ -253,7 +253,7 @@ export default async function ManualDealSpecificPage(props: {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>AI Reasoning</CardTitle>
             <Button variant="outline" size="sm" asChild>
-              <Link href={`/manual-deals/${id}/screen`}>
+              <Link href={`/raw-deals/${uid}/screen`}>
                 <Plus className="mr-2 h-4 w-4" /> Add AI Reasoning
               </Link>
             </Button>
