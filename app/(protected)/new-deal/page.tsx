@@ -5,7 +5,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import CreateNewDealForm from "@/components/forms/new-deal-form";
 import { Metadata } from "next";
-import { BulkImportDialog } from "@/components/Dialogs/bulk-import-dialog";
+// BulkImportDialog is unused, consider removing if not needed elsewhere
+// import { BulkImportDialog } from "@/components/Dialogs/bulk-import-dialog";
 import BulkImportCard from "@/components/cards/bulk-import-card";
 export const metadata: Metadata = {
   title: "Add New Deal",
@@ -22,35 +23,29 @@ const NewDealPage = async () => {
           Add a new Deal to the Database by bulk importing or adding it manually
         </p>
       </div>
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:gap-8">
-        <div className="">
-          <div className="space-y-4 lg:sticky lg:top-24">
-            <BulkImportCard />
-            <div className="h-fit rounded-lg border bg-muted p-6 shadow-lg">
-              <h2 className="mb-4 text-center text-xl font-semibold">
-                Infer Deal
-              </h2>
-              <p className="mb-2 text-center text-gray-600 dark:text-gray-200">
-                Enter the description of a deal and use AI to generate the
-                required format for the deal, save it to the database and then
-                scrape it
-              </p>
+      {/* Changed lg breakpoint to md for earlier responsiveness */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8">
+        <BulkImportCard />
+        <div className="h-fit rounded-lg border bg-muted p-6 shadow-lg">
+          <h2 className="mb-4 text-center text-xl font-semibold">Infer Deal</h2>
+          <p className="mb-2 text-center text-gray-600 dark:text-gray-200">
+            Enter the description of a deal and use AI to generate the required
+            format for the deal, save it to the database and then scrape it
+          </p>
 
-              <p className="mb-6 text-center text-red-600">
-                Note:- Double check the output given by AI and save it
-                accordingly
-              </p>
-              <div className="flex justify-center">
-                <Button className="w-full" asChild>
-                  <Link href="/infer">
-                    <Bot className="mr-2 h-4 w-4" /> Infer Deal
-                  </Link>
-                </Button>
-              </div>
-            </div>
+          <p className="mb-6 text-center text-red-600">
+            Note:- Double check the output given by AI and save it accordingly
+          </p>
+          <div className="flex justify-center">
+            <Button className="w-full" asChild>
+              <Link href="/infer">
+                <Bot className="mr-2 h-4 w-4" /> Infer Deal
+              </Link>
+            </Button>
           </div>
         </div>
-        <div>
+        {/* Changed col-span-2 to md:col-span-2 to match the grid breakpoint */}
+        <div className="h-fit rounded-lg border p-6 shadow-lg md:col-span-2">
           <h2 className="mb-4">Add Deal Manually</h2>
           <CreateNewDealForm />
         </div>

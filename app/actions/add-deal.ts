@@ -5,7 +5,8 @@ import {
   NewDealFormSchemaType,
 } from "@/components/forms/new-deal-form";
 import prismaDB from "@/lib/prisma";
-import { DealType } from "@prisma/client";
+import { withAuthServerAction } from "@/lib/withAuth";
+import { DealType, User } from "@prisma/client";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { revalidatePath } from "next/cache";
 import React from "react";
@@ -23,56 +24,54 @@ import React from "react";
  *
  * @returns {Promise<void>} Returns a promise that resolves once the deal has been added to Firebase.
  */
-const AddDealToDB = async (values: NewDealFormSchemaType) => {
-  try {
-    console.log("in add deal to firebase", values);
+const AddDealToDB = withAuthServerAction(
+  async (user: User, values: NewDealFormSchemaType) => {
+    try {
+      const addedDeal = await prismaDB.deal.create({
+        data: {
+          title: values.title,
+          dealCaption: values.deal_caption,
+          firstName: values.first_name,
+          lastName: values.last_name,
+          email: values.email,
+          linkedinUrl: values.linkedinurl,
+          workPhone: values.work_phone,
+          revenue: values.revenue,
+          ebitda: values.ebitda,
+          ebitdaMargin: values.ebitda_margin,
+          grossRevenue: values.gross_revenue,
+          companyLocation: values.company_location,
+          brokerage: values.brokerage,
+          sourceWebsite: values.source_website || "",
+          industry: values.industry,
+          askingPrice: values.asking_price,
+          dealType: DealType.MANUAL,
+          userId: user.id,
+        },
+      });
 
-    const addedDeal = await prismaDB.deal.create({
-      data: {
-        title: values.title,
-        dealCaption: values.deal_caption,
-        firstName: values.first_name,
-        lastName: values.last_name,
-        email: values.email,
-        linkedinUrl: values.linkedinurl,
-        workPhone: values.work_phone,
-        revenue: values.revenue,
-        ebitda: values.ebitda,
-        ebitdaMargin: values.ebitda_margin,
-        grossRevenue: values.gross_revenue,
-        companyLocation: values.company_location,
-        brokerage: values.brokerage,
-        sourceWebsite: values.source_website || "",
-        industry: values.industry,
-        askingPrice: values.asking_price,
-        dealType: DealType.MANUAL,
-      },
-    });
+      revalidatePath(`/manual-deals`);
 
-    revalidatePath(`/manual-deals`);
-
-    return {
-      type: "success",
-      message: "Deal saved successfully",
-      documentId: addedDeal.id,
-    };
-  } catch (error) {
-    console.error("Error adding deal: ", error);
-    if (error instanceof Error) {
       return {
-        type: "error",
-        message:
-          error.message.length > 0
-            ? error.message
-            : "Failed to add the deal. Please try again.",
+        dealId: addedDeal.id,
+        success: "Deal added successfully",
+      };
+    } catch (error) {
+      console.error("Error adding deal: ", error);
+      if (error instanceof Error) {
+        return {
+          error:
+            error.message.length > 0
+              ? error.message
+              : "Failed to add the deal. Please try again.",
+        };
+      }
+
+      return {
+        error: "Failed to add the deal. Please try again.",
       };
     }
-
-    return {
-      type: "error",
-      message: "Failed to add the deal. Please try again.",
-    };
-  }
-};
+  },
+);
 
 export default AddDealToDB;
