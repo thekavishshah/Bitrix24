@@ -30,6 +30,7 @@ model User {
   updatedAt     DateTime        @updatedAt
   isBlocked     Boolean         @default(false)
   UserActionLog UserActionLog[]
+  Deal          Deal[]
 }
 
 model Account {
@@ -79,6 +80,9 @@ model Deal {
 
   bitrixId        String?
   bitrixCreatedAt DateTime?
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
 }
 
 model SIM {

@@ -11,32 +11,35 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Upload, File, AlertCircle, Loader2, CheckCircle } from "lucide-react";
+import {
+  Upload,
+  File as FileIcon,
+  AlertCircle,
+  Loader2,
+  CheckCircle,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "../ui/scroll-area";
 import { TransformedDeal } from "@/app/types";
 import { useToast } from "@/hooks/use-toast";
-import { set } from "date-fns";
-import { Deal } from "@prisma/client";
 import BulkUploadDealsToDB from "@/app/actions/bulk-upload-deal";
 
 type SheetDeal = {
-  "Brokerage ": string; // The brokerage company name
-  "First Name"?: string; // First name of the contact (optional in some rows)
-  "Last Name"?: string; // Last name of the contact (optional in some rows)
-  "Work Phone"?: string; // Work phone number (optional in some rows)
+  Brokerage: string;
+  "First Name"?: string;
+  "Last Name"?: string;
+  "Work Phone"?: string;
   Email?: string;
   "LinkedIn URL"?: string;
-  "Deal Caption": string; // Caption or description of the deal
-  Revenue: number; // Revenue associated with the deal
-  EBITDA: number; // Earnings before interest, taxes, depreciation, and amortization
-  "EBITDA Margin": number; // EBITDA margin as a decimal
-  Industry: string; // Industry category of the deal
-  "Source Website": string; // URL of the source listing for the deal
-  Upload: "Y" | "N"; // Whether to upload the deal (Y for Yes, N for No)
-  UploadOnCRM: "Yes" | "No"; // Whether the deal is uploaded on the CRM
-  "Company Location"?: string; // Location of the company (optional in some rows)
+  "Deal Caption": string;
+  Revenue: number;
+  EBITDA: number;
+  "EBITDA Margin": number;
+  Industry: string;
+  "Source Website": string;
+  Upload: "Y" | "N";
+  UploadOnCRM: "Yes" | "No";
+  "Company Location"?: string;
 };
 
 export function BulkImportDialog() {
@@ -49,13 +52,33 @@ export function BulkImportDialog() {
   const [uploading, setUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
 
+  const expectedHeaders = [
+    "Brokerage",
+    "First Name",
+    "Last Name",
+    "Work Phone",
+    "Email",
+    "LinkedIn URL",
+    "Deal Caption",
+    "Revenue",
+    "EBITDA",
+    "EBITDA Margin",
+    "Industry",
+    "Source Website",
+    "Upload",
+    "UploadOnCRM",
+    "Company Location",
+  ];
+
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (file) {
+      const validTypes = [
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "text/csv",
+      ];
       if (
-        file.type ===
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
-        file.type === "text/csv" ||
+        validTypes.includes(file.type) ||
         file.name.endsWith(".xlsx") ||
         file.name.endsWith(".csv")
       ) {
@@ -63,6 +86,8 @@ export function BulkImportDialog() {
         setError(null);
         parseFile(file);
       } else {
+        setFile(null);
+        setDeals([]);
         setError("Please upload a valid Excel (.xlsx) or CSV file.");
       }
     }
@@ -77,16 +102,33 @@ export function BulkImportDialog() {
       const workbook = XLSX.read(data, { type: "array" });
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
+
+      const rows = XLSX.utils.sheet_to_json<string[]>(worksheet, { header: 1 });
+      const headerRow = (rows[0] || []) as string[];
+      console.log("headerRow", headerRow);
+      console.log("expectedHeaders", expectedHeaders);
+
+      const missing = expectedHeaders.filter((h) => !headerRow.includes(h));
+      const extra = headerRow.filter((h) => !expectedHeaders.includes(h));
+      if (missing.length > 0 || extra.length > 0) {
+        const msgs: string[] = [];
+        if (missing.length) msgs.push(`Missing columns: ${missing.join(", ")}`);
+        if (extra.length) msgs.push(`Unexpected columns: ${extra.join(", ")}`);
+        setError(`Invalid file format. ${msgs.join(". ")}`);
+        setDeals([]);
+        return;
+      }
+
       const jsonData = XLSX.utils.sheet_to_json(worksheet) as SheetDeal[];
       setDeals(jsonData);
+      setError(null);
     };
     reader.readAsArrayBuffer(file);
   };
 
   const transformDeals = (deals: SheetDeal[]): TransformedDeal[] => {
-    console.log("transforming deals........");
     return deals.map((deal) => ({
-      brokerage: deal["Brokerage "],
+      brokerage: deal["Brokerage"],
       firstName: deal["First Name"],
       lastName: deal["Last Name"],
       linkedinUrl: deal["LinkedIn URL"],
@@ -106,40 +148,25 @@ export function BulkImportDialog() {
     if (!file || deals.length === 0) return;
 
     setUploading(true);
+    setSuccess(null);
+    setError(null);
 
-    console.log("Deals to upload", deals);
-
-    // Transform the deals into the required format
     const formattedDeals = transformDeals(deals);
-
-    console.log("Formatted Deals to Upload", formattedDeals);
-
+    console.log("formattedDeals", formattedDeals);
     const response = await BulkUploadDealsToDB(formattedDeals);
 
-    if (response.type === "success") {
-      setSuccess(response.message);
+    if (response.error) {
+      setError(response.error);
       toast({
-        title: "Deals uploaded successfully",
-        description: response.message,
-      });
-    }
-
-    if (response.type === "error") {
-      setError(response.message);
-      toast({
-        title: "Error uploading deals ",
+        title: "Error uploading deals",
         variant: "destructive",
-        description: response.message,
+        description: response.error,
       });
-    }
-
-    if (response.type === "partial_success") {
-      setError(response.message);
-      toast({
-        title: "Partial Deals Uploaded",
-        variant: "destructive",
-        description: response.message,
-      });
+    } else {
+      setSuccess("Deals uploaded successfully");
+      setDeals([]);
+      setFile(null);
+      toast({ title: "Deals uploaded successfully" });
     }
 
     setUploading(false);
@@ -159,7 +186,7 @@ export function BulkImportDialog() {
           <DialogHeader>
             <DialogTitle>Bulk Import Deals</DialogTitle>
           </DialogHeader>
-          <ScrollArea>
+          <ScrollArea className="h-[250px] w-full sm:h-[350px] md:h-[400px] lg:h-[450px]">
             <div className="grid gap-4 py-4">
               <div
                 {...getRootProps()}
@@ -171,7 +198,7 @@ export function BulkImportDialog() {
                 <input {...getInputProps()} />
                 {file ? (
                   <div className="flex items-center justify-center">
-                    <File className="mr-2 h-6 w-6" />
+                    <FileIcon className="mr-2 h-6 w-6" />
                     <span>{file.name}</span>
                   </div>
                 ) : (
@@ -182,15 +209,15 @@ export function BulkImportDialog() {
                 )}
               </div>
               {success && (
-                <div className="flex items-center text-green-600 dark:text-green-400">
-                  <CheckCircle className="mr-2 h-4 w-4" />
-                  <span>{success}</span>
+                <div className="flex items-start text-green-600 dark:text-green-400">
+                  <CheckCircle className="mr-2 h-4 w-4 flex-shrink-0" />
+                  <span className="min-w-0 break-words">{success}</span>
                 </div>
               )}
               {error && (
-                <div className="flex items-center text-destructive">
-                  <AlertCircle className="mr-2 h-4 w-4" />
-                  <span>{error}</span>
+                <div className="flex items-start text-destructive">
+                  <AlertCircle className="mr-2 h-4 w-4 flex-shrink-0" />
+                  <span className="min-w-0 break-words">{error}</span>
                 </div>
               )}
               {deals.length > 0 && (
