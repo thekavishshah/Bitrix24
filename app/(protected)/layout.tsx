@@ -9,6 +9,7 @@ import MenuDialog from "@/components/Dialogs/menu-dialog";
 import { ThemeProvider } from "@/components/theme-provider";
 import { auth } from "@/auth";
 import Footer from "@/components/Footer";
+import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
   title: "Dark Alpha Capital Deal Sourcing Organization",
@@ -31,13 +32,15 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <main>
-            <MenuDialog />
-            <Header session={userSession} />
+          <SessionProvider>
+            <main>
+              <MenuDialog />
+              <Header session={userSession} />
 
-            {children}
-            <Footer />
-          </main>
+              {children}
+              <Footer />
+            </main>
+          </SessionProvider>
           <Toaster />
         </ThemeProvider>
       </body>

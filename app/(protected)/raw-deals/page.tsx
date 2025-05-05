@@ -12,10 +12,12 @@ import DealTypeFilter from "@/components/DealTypeFilter";
 import { DealType } from "@prisma/client";
 import SearchDealsSkeleton from "@/components/skeletons/SearchDealsSkeleton";
 import SearchEbitdaDeals from "@/components/SearchEbitdaDeals";
+import DealTypeFilterSkeleton from "@/components/skeletons/DealTypeFilterSkeleton";
+import UserDealFilter from "@/components/UserDealFilter";
 
 export const metadata: Metadata = {
-  title: "Inferred Deals",
-  description: "View the inferred deals scraped using AI",
+  title: "Raw Deals",
+  description: "View the raw deals",
 };
 
 // After
@@ -29,15 +31,12 @@ const RawDealsPage = async (props: { searchParams: SearchParams }) => {
   const offset = (currentPage - 1) * limit;
 
   const ebitda = searchParams?.ebitda || "";
-
+  const userId = searchParams?.userId || "";
   // Ensure dealTypes is always an array
   const dealTypes =
     typeof searchParams?.dealType === "string"
       ? [searchParams.dealType]
       : searchParams?.dealType || [];
-
-  console.log("dealTypes", dealTypes);
-  console.log("ebitda", ebitda);
 
   const { data, totalPages, totalCount } = await GetAllDeals({
     search,
@@ -45,6 +44,7 @@ const RawDealsPage = async (props: { searchParams: SearchParams }) => {
     limit,
     dealTypes: dealTypes as DealType[],
     ebitda,
+    userId,
   });
 
   const currentUserRole = await getCurrentUserRole();
@@ -78,7 +78,12 @@ const RawDealsPage = async (props: { searchParams: SearchParams }) => {
             <SearchEbitdaDeals />
           </Suspense>
         </div>
-        <DealTypeFilter />
+        <Suspense fallback={<DealTypeFilterSkeleton />}>
+          <DealTypeFilter />
+        </Suspense>
+        <Suspense fallback={<DealTypeFilterSkeleton />}>
+          <UserDealFilter />
+        </Suspense>
       </div>
 
       <div className="group-has-[[data-pending]]:animate-pulse">

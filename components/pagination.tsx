@@ -24,8 +24,8 @@ export default function Pagination({ totalPages }: IPagination) {
 
   return (
     <>
-      <div className="flex items-center space-x-1">
-        <Button size="icon" className="h-8 w-8" asChild>
+      <div className="mt-4 flex items-center space-x-1 md:mt-8">
+        <Button asChild>
           <Link
             href={createPageURL(currentPage - 1)}
             className={
@@ -33,10 +33,10 @@ export default function Pagination({ totalPages }: IPagination) {
             }
             prefetch={true}
           >
-            <ChevronLeft />
+            Previous
           </Link>
         </Button>
-        <Button size="icon" className="h-8 w-8" asChild>
+        <Button asChild>
           <Link
             href={createPageURL(currentPage + 1)}
             className={
@@ -44,7 +44,7 @@ export default function Pagination({ totalPages }: IPagination) {
             }
             prefetch={true}
           >
-            <ChevronRight />
+            Next
           </Link>
         </Button>
       </div>

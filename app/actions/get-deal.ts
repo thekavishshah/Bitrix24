@@ -55,12 +55,14 @@ export const GetAllDeals = async ({
   limit = 20,
   dealTypes,
   ebitda,
+  userId,
 }: {
   search?: string | undefined;
   offset?: number;
   limit?: number;
   dealTypes?: DealType[];
   ebitda?: string;
+  userId?: string;
 }): Promise<GetDealsResult> => {
   const ebitdaValue = ebitda ? parseFloat(ebitda) : undefined;
 
@@ -70,6 +72,7 @@ export const GetAllDeals = async ({
       ? { dealType: { in: dealTypes } }
       : {}),
     ...(ebitdaValue !== undefined ? { ebitda: { gte: ebitdaValue } } : {}),
+    ...(userId ? { userId: { equals: userId } } : {}),
   };
 
   console.log("whereClause", whereClause);
