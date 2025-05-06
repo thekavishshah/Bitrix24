@@ -1,4 +1,4 @@
-import { exa, mainAIModel } from "../available-models";
+import { exa, openai } from "../available-models";
 import { generateObject, generateText, tool } from "ai";
 import { z } from "zod";
 
@@ -30,7 +30,7 @@ const searchAndProcess = async (
   const pendingSearchResults: SearchResult[] = [];
   const finalSearchResults: SearchResult[] = [];
   await generateText({
-    model: mainAIModel,
+    model: openai("gpt-4o"),
     prompt: `Search the web for information about ${query}`,
     system:
       "You are a researcher. For each query, search the web and then evaluate if the results are relevant and will help answer the following query",
@@ -53,7 +53,7 @@ const searchAndProcess = async (
         async execute() {
           const pendingResult = pendingSearchResults.pop()!;
           const { object: evaluation } = await generateObject({
-            model: mainAIModel,
+            model: openai("gpt-4o"),
             prompt: `Evaluate whether the search results are relevant and will help answer the following query: ${query}. If the page already exists in the existing results, mark it as irrelevant.
    
               <search_results>
@@ -86,7 +86,7 @@ const searchAndProcess = async (
 
 const generateLearnings = async (query: string, searchResult: SearchResult) => {
   const { object } = await generateObject({
-    model: mainAIModel,
+    model: openai("gpt-4o"),
     prompt: `The user is researching "${query}". The following search result were deemed relevant.
       Generate a learning and a follow-up question from the following search result:
    
