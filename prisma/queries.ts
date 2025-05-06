@@ -17,16 +17,3 @@ export const getUserById = async (userId: string) => {
     throw error;
   }
 };
-
-/**
- * Get all system logs
- * @returns All system logs
- */
-// export const getAllSystemLogs = async () => {
-//   try {
-//     return await prismaDB.userActionLog.findMany();
-//   } catch (error) {
-//     console.log("error getting system logs", error);
-//     throw error;
-//   }
-// };
