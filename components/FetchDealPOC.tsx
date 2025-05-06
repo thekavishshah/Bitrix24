@@ -19,10 +19,6 @@ const FetchDealPOC = async ({
       <AddPocDialog dealId={dealId} />
 
       {pocs.length > 0 ? (
-        // The ScrollArea component itself should be added by the colleague around the ul,
-        // for example: <ScrollArea className="h-72 w-full rounded-md border">
-        // The ul tag is opened here (within the selection) but closed outside the selection.
-        // Adding p-4 to ul for padding when it's inside a ScrollArea.
         <ul className="space-y-3 p-4">
           {pocs.map((poc) => (
             <li

@@ -92,6 +92,7 @@
   },
   "devDependencies": {
     "@clerk/types": "^4.35.0",
+    "@tailwindcss/typography": "^0.5.16",
     "@types/node": "^20.17.28",
     "@types/react": "^18",
     "@types/react-dom": "^18",

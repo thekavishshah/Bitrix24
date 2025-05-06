@@ -1,76 +1,67 @@
-// "use server";
+"use server";
 
-// import { openaiClient } from "@/lib/ai/available-models";
-// import { withAuthServerAction } from "@/lib/withAuth";
-// import { DealType } from "@prisma/client";
-// import { User } from "@prisma/client";
+import { openaiClient } from "@/lib/ai/available-models";
+import { withAuthServerAction } from "@/lib/withAuth";
+import { Deal, Sentiment } from "@prisma/client";
+import { User } from "@prisma/client";
+import { z } from "zod";
+import { zodTextFormat } from "openai/helpers/zod";
+import { auth } from "@/auth";
+const DealScreeningResult = z.object({
+  title: z.string(),
+  explanation: z.string(),
+  sentiment: z.nativeEnum(Sentiment),
+  score: z.number(),
+});
 
-// const screenDeal = withAuthServerAction(
-//   async (user: User, dealId: string, dealType: DealType) => {
-//     try {
-//       const assistant = await openaiClient.beta.assistants.create({
-//         name: "Financial Analyst Assistant",
-//         instructions:
-//           "You are an expert financial analyst. Use you knowledge base to answer questions about audited financial statements.",
-//         model: "gpt-4o",
-//         tools: [{ type: "file_search" }],
-//         tool_resources: {
-//           file_search: {
-//             vector_store_ids: ["vs_J6ChDdA5z2j0fJKtmoOQnohz"],
-//           },
-//         },
-//       });
+type DealScreeningResult = z.infer<typeof DealScreeningResult>;
 
-//       const thread = await openaiClient.beta.threads.create();
-//       await openaiClient.beta.threads.messages.create(thread.id, {
-//         role: "user",
-//         content: "Explain the criteria of Dark Alpha Capital in detail",
-//       });
-//       console.log("created a thread message");
-//       const run = await openaiClient.beta.threads.runs.create(thread.id, {
-//         assistant_id: assistant.id,
-//       });
-//       console.log("created a run");
-//       let runStatus;
-//       do {
-//         runStatus = await openaiClient.beta.threads.runs.retrieve(
-//           thread.id,
-//           run.id,
-//         );
-//         if (runStatus.status !== "completed") {
-//           await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second before checking again
-//         }
-//       } while (runStatus.status !== "completed");
+const screenDeal = async (deal: Deal) => {
+  const session = await auth();
 
-//       console.log("runStatus", runStatus);
+  if (!session?.user) {
+    return {
+      type: "error",
+      message: "Unauthorized",
+    };
+  }
 
-//       const messages = await openaiClient.beta.threads.messages.list(thread.id);
-//       const assistantMessage = messages.data.find(
-//         (msg) => msg.role === "assistant",
-//       );
+  try {
+    const response = await openaiClient.responses.create({
+      model: "gpt-4.1",
+      tools: [
+        {
+          type: "file_search",
+          vector_store_ids: ["vs_J6ChDdA5z2j0fJKtmoOQnohz"],
+          max_num_results: 20,
+        },
+      ],
+      input: [
+        {
+          role: "system",
+          content:
+            "You are a senior investment analyst at Dark Alpha Capital, specializing in evaluating deals based on our firm's proprietary screening criteria. Utilize the provided vector store to retrieve relevant guidelines and apply them meticulously to assess the given deal. Your evaluation should include:\n\n- A clear title summarizing the deal.\n- An explanation detailing how the deal aligns or misaligns with our screening criteria.\n- An overall sentiment classification: Positive, Neutral, or Negative.\n- A numerical score between 0 and 100, reflecting the deal's alignment with our criteria.\n\nIf specific information is unavailable, explicitly state this in your explanation. Ensure your response is structured to match the predefined schema for seamless integration.",
+        },
+        {
+          role: "user",
+          content: `Please evaluate the following deal: ${JSON.stringify(deal)}`,
+        },
+      ],
+    });
 
-//       console.log("assistantMessage", assistantMessage);
-//       if (assistantMessage) {
-//         console.log(assistantMessage.content[0].type);
-//         console.log(assistantMessage.content[0].text);
-//       }
+    console.log("Response output:", response);
 
-//       return {
-//         success: true,
-//         message: assistantMessage?.content[0],
-//       };
-//     } catch (error) {
-//       console.log(error);
-//       if (error instanceof Error) {
-//         return {
-//           error: error.message || "Failed to screen deal",
-//         };
-//       }
-//       return {
-//         error: "Failed to screen deal",
-//       };
-//     }
-//   },
-// );
+    return {
+      type: "success",
+      data: response.output_text,
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      type: "error",
+      message: "An unknown error occurred",
+    };
+  }
+};
 
-// export default screenDeal;
+export default screenDeal;
