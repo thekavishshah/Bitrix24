@@ -19,3 +19,19 @@ export const getUserById = async (id: string) => {
     throw new Error("Error fetching user by id");
   }
 };
+
+/**
+ * Get a deal POC by deal id
+ * @param dealId - the id of the deal
+ * @returns the deal POC
+ */
+export const getDealPOC = async (dealId: string) => {
+  try {
+    return await prismaDB.pOC.findMany({
+      where: { dealId },
+    });
+  } catch (error) {
+    console.error("Error fetching deal POC", error);
+    throw new Error("Error fetching deal POC");
+  }
+};

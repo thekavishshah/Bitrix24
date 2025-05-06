@@ -40,6 +40,7 @@ import {
 import { exportDealToBitrix } from "@/app/actions/upload-bitrix";
 import { toast } from "sonner";
 import UploadDealToBitrixButton from "@/components/Buttons/upload-deal-bitrix-button";
+import FetchDealPOC from "@/components/FetchDealPOC";
 
 type Params = Promise<{ uid: string }>;
 
@@ -154,8 +155,8 @@ export default async function ManualDealSpecificPage(props: {
           </Button>
         )}
       </div>
-      <div className="grid gap-8 lg:grid-cols-2">
-        <Card className="overflow-hidden border-2 border-primary/10 shadow-lg transition-all duration-300 hover:border-primary/20 hover:shadow-primary/10">
+      <div className="grid gap-4 md:gap-8 lg:grid-cols-2 lg:gap-12">
+        <Card className="h-fit overflow-hidden border-2 border-primary/10 shadow-lg transition-all duration-300 hover:border-primary/20 hover:shadow-primary/10">
           <CardHeader className="border-b bg-primary/5 pb-4">
             <div className="flex items-center justify-between">
               <CardTitle className="text-2xl font-bold text-primary">
@@ -197,6 +198,11 @@ export default async function ManualDealSpecificPage(props: {
                 icon={<Hash className="text-blue-500" />}
                 label="Deal ID"
                 value={id}
+              />
+              <DealDetailItem
+                icon={<Hash className="text-blue-500" />}
+                label="Bitrix ID"
+                value={bitrixId}
               />
               <DealDetailItem
                 icon={<Tag className="text-green-500" />}
@@ -258,7 +264,7 @@ export default async function ManualDealSpecificPage(props: {
           </CardContent>
         </Card>
 
-        <Card className="lg:row-span-2">
+        <Card className="">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>AI Reasoning</CardTitle>
             <Button variant="outline" size="sm" asChild>
@@ -301,6 +307,16 @@ export default async function ManualDealSpecificPage(props: {
                 <FetchDealSim dealId={uid} dealType={dealType} />
               </ScrollArea>
             </Suspense>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Point of Contacts</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-[300px] pr-4">
+              <FetchDealPOC dealId={uid} dealType={dealType} />
+            </ScrollArea>
           </CardContent>
         </Card>
       </div>

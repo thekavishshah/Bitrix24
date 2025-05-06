@@ -83,6 +83,16 @@ model Deal {
 
   userId String?
   user   User?   @relation(fields: [userId], references: [id])
+  POC    POC[]
+}
+
+model POC {
+  id        String  @id @default(cuid())
+  name      String
+  workPhone String?
+  email     String
+  Deal      Deal?   @relation(fields: [dealId], references: [id])
+  dealId    String?
 }
 
 model SIM {
