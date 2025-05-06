@@ -54,14 +54,7 @@ const DealTypeFilter = () => {
         <DropdownMenuContent className="w-56">
           <DropdownMenuLabel>Filter by Deal Type</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuCheckboxItem
-            checked={selectedDealTypes.includes("PERSONAL")}
-            onCheckedChange={(checked) =>
-              handleCheckedChange("PERSONAL", checked)
-            }
-          >
-            Personal
-          </DropdownMenuCheckboxItem>
+
           <DropdownMenuCheckboxItem
             checked={selectedDealTypes.includes("MANUAL")}
             onCheckedChange={(checked) =>
