@@ -11,6 +11,7 @@ import { Trash2, Save, PlayCircle } from "lucide-react";
 import screenDeal from "@/app/actions/screen-deal";
 import { screeningSaveResult } from "@/app/actions/screening-save-result";
 import { Skeleton } from "./ui/skeleton";
+import axios from "axios";
 
 const ScreenDealComponent = ({ deal }: { deal: Deal }) => {
   const [isPending, startTransition] = useTransition();
@@ -21,12 +22,14 @@ const ScreenDealComponent = ({ deal }: { deal: Deal }) => {
     setScreeningResult(""); // Clear previous results
     startTransition(async () => {
       try {
-        const response = await screenDeal(deal);
-        if (response.type === "error") {
-          toast.error(response.message);
-        } else {
+        const response = await axios.post<{ result: string }>("/api/screen", {
+          deal,
+        });
+        if (response.status === 200) {
           toast.success("Deal screened successfully");
-          setScreeningResult(response.data || "");
+          setScreeningResult(response.data.result || "");
+        } else {
+          toast.error("Failed to screen deal");
         }
       } catch (error) {
         toast.error("Failed to screen deal");

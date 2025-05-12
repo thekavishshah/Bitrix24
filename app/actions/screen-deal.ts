@@ -14,10 +14,6 @@ const DealScreeningResult = z.object({
   score: z.number(),
 });
 
-export const maxDuration = 30;
-
-type DealScreeningResult = z.infer<typeof DealScreeningResult>;
-
 const screenDeal = async (deal: Deal) => {
   const session = await auth();
 
@@ -56,7 +52,7 @@ const screenDeal = async (deal: Deal) => {
 
     return {
       type: "success",
-      data: response.output_text,
+      result: response.output_text,
     };
   } catch (error) {
     console.error(error);
