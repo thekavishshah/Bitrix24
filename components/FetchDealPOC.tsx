@@ -19,7 +19,7 @@ const FetchDealPOC = async ({
       <AddPocDialog dealId={dealId} />
 
       {pocs.length > 0 ? (
-        <ul className="space-y-3 p-4">
+         <ul className="space-y-3 p-4">
           {pocs.map((poc) => (
             <li
               key={poc.id}

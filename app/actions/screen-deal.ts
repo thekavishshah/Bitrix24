@@ -14,12 +14,15 @@ const DealScreeningResult = z.object({
   score: z.number(),
 });
 
+export const maxDuration = 30;
+
 type DealScreeningResult = z.infer<typeof DealScreeningResult>;
 
 const screenDeal = async (deal: Deal) => {
   const session = await auth();
 
   if (!session?.user) {
+    console.log("user is not logged in");
     return {
       type: "error",
       message: "Unauthorized",
@@ -57,6 +60,14 @@ const screenDeal = async (deal: Deal) => {
     };
   } catch (error) {
     console.error(error);
+
+    if (error instanceof Error) {
+      return {
+        type: "error",
+        message: error.message,
+      };
+    }
+
     return {
       type: "error",
       message: "An unknown error occurred",
