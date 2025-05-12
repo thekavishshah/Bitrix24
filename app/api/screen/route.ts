@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 
 export const maxDuration = 30;
 
-export async function POST(req: Request) {
+export async function GET(req: Request) {
   const session = await auth();
 
   if (!session?.user) {
@@ -43,10 +43,13 @@ export async function POST(req: Request) {
       ],
     });
 
-    return new Response(JSON.stringify(response.output), {
-      headers: {
-        "Content-Type": "application/json",
-      },
+    console.log("response ", response);
+    console.log("response ", response.output);
+
+    // Extract just the annotations and text from the response
+    const messageContent = response.output_text;
+    return NextResponse.json({
+      text: messageContent,
     });
   } catch (error) {
     console.error(error);

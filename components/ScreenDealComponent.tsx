@@ -17,17 +17,23 @@ const ScreenDealComponent = ({ deal }: { deal: Deal }) => {
   const [isPending, startTransition] = useTransition();
   const [isSaving, startSavingTransition] = useTransition();
   const [screeningResult, setScreeningResult] = useState<string>("");
+  const [annotations, setAnnotations] = useState<string[]>([]);
 
   const handleScreenDeal = async () => {
     setScreeningResult(""); // Clear previous results
     startTransition(async () => {
       try {
-        const response = await axios.post<{ result: string }>("/api/screen", {
-          deal,
+        const response = await axios.get("/api/screen", {
+          params: {
+            deal,
+          },
         });
+
+        const result = await response.data;
         if (response.status === 200) {
           toast.success("Deal screened successfully");
-          setScreeningResult(response.data.result || "");
+          //@ts-ignore
+          setScreeningResult(result.text!);
         } else {
           toast.error("Failed to screen deal");
         }
@@ -103,8 +109,13 @@ const ScreenDealComponent = ({ deal }: { deal: Deal }) => {
               <Skeleton className="h-4 w-3/4" />
             </div>
           ) : screeningResult ? (
-            <div className="prose dark:prose-invert max-w-none">
-              <ReactMarkdown>{screeningResult}</ReactMarkdown>
+            <div>
+              {annotations.map((annotation) => (
+                <div key={annotation}>{annotation}</div>
+              ))}
+              <div className="prose dark:prose-invert max-w-none">
+                <ReactMarkdown>{screeningResult}</ReactMarkdown>
+              </div>
             </div>
           ) : (
             <div className="flex h-[400px] items-center justify-center text-center text-muted-foreground">
