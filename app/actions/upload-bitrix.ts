@@ -16,11 +16,11 @@ import { withAuthServerAction } from "@/lib/withAuth";
  */
 const exportDealToBitrix = withAuthServerAction(
   async (user: User, deal: Deal) => {
-    const fields = {
+    const rawFields = {
       // Standard field: Deal name
       TITLE: deal.dealCaption,
-      OPPORTUNITY: deal.revenue,
-      UF_CRM_1715146259470: deal.revenue,
+      OPPORTUNITY: Number(deal.revenue),
+      UF_CRM_1715146259470: Number(deal.revenue),
       UF_CRM_1715146404315: deal.sourceWebsite,
       UF_CRM_1711453168658: deal.companyLocation,
       UF_CRM_FIRST_NAME: deal.firstName,
@@ -29,10 +29,22 @@ const exportDealToBitrix = withAuthServerAction(
       UF_CRM_LINKEDIN_URL: deal.linkedinUrl,
       UF_CRM_WORK_PHONE: deal.workPhone,
       COMMENTS: `Industry: ${deal.industry} | EBITDA: ${deal.ebitda} | EBITDA Margin: ${deal.ebitdaMargin}`,
-      UF_CRM_1727869474151: deal.askingPrice
-        ? String(deal.askingPrice)
-        : undefined,
+      UF_CRM_1727869474151:
+        deal.askingPrice != null && !isNaN(deal.askingPrice as any)
+          ? {
+              VALUE: Number(deal.askingPrice),
+              CURRENCY: "USD",
+            }
+          : undefined,
     };
+
+    const fields = Object.fromEntries(
+      Object.entries(rawFields).filter(
+        ([_, v]) => v !== undefined && v !== null,
+      ),
+    );
+
+    console.log("fields", fields);
 
     const BITRIX_URL = process.env.BITRIX24_WEBHOOK;
     const endpoint = `${BITRIX_URL}/crm.deal.add.json`;
@@ -45,6 +57,7 @@ const exportDealToBitrix = withAuthServerAction(
 
       // Type assertion for response.data to handle the unknown type
       const responseData = response.data as { result?: number };
+      console.log("response data", responseData);
 
       if (responseData.result) {
         await prismaDB.deal.update({
