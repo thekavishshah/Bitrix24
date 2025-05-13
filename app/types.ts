@@ -47,3 +47,21 @@ export type EvalOptions = {
   framework?: "swot" | "porter";
   temperature?: number;
 };
+
+export type BitrixDealGET = {
+  id: string;
+  dealCaption: string;
+  revenue: number;
+  ebitda: number;
+  ebitdaMargin: number;
+  askingPrice?: number;
+  sourceWebsite: string;
+  companyLocation?: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  linkedinUrl?: string;
+  workPhone?: string;
+  brokerage: string;
+  dealType: "MANUAL";
+};

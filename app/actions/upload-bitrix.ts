@@ -29,6 +29,8 @@ const exportDealToBitrix = withAuthServerAction(
       UF_CRM_LINKEDIN_URL: deal.linkedinUrl,
       UF_CRM_WORK_PHONE: deal.workPhone,
       COMMENTS: `Industry: ${deal.industry} | EBITDA: ${deal.ebitda} | EBITDA Margin: ${deal.ebitdaMargin}`,
+      ORIGINATOR_ID: "DARK_ALPHA_APP",
+      ORIGIN_ID: deal.id.toString(),
       UF_CRM_1727869474151:
         deal.askingPrice != null && !isNaN(deal.askingPrice as any)
           ? {
