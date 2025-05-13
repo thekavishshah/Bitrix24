@@ -3,8 +3,13 @@ import ScreenDealComponent from "@/components/ScreenDealComponent";
 import prismaDB from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Metadata } from "next";
-import React from "react";
+import React, { Suspense } from "react";
 import { Badge } from "@/components/ui/badge";
+import AIReasoningSkeleton from "@/components/skeletons/AIReasoningSkeleton";
+import { AlertTriangle } from "lucide-react";
+import AIReasoning from "@/components/AiReasoning";
+import { Button } from "@/components/ui/button";
+import { DealType } from "@prisma/client";
 
 type Params = Promise<{ uid: string }>;
 
@@ -54,7 +59,7 @@ const ScreenDealPage = async ({ params }: { params: Params }) => {
           </CardHeader>
           <CardContent>
             <p className="text-center text-muted-foreground">
-              The deal you are looking for does not exist or has been removed.
+              The deal you are looking for was not found.
             </p>
           </CardContent>
         </Card>
@@ -71,70 +76,79 @@ const ScreenDealPage = async ({ params }: { params: Params }) => {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
-          {/* Deal Information Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Deal Information</span>
-                <Badge variant="outline">{fetchedDeal.brokerage}</Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold">
-                  {fetchedDeal.dealCaption}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {fetchedDeal.firstName} {fetchedDeal.lastName}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="font-medium">Contact</p>
-                  <p className="text-muted-foreground">{fetchedDeal.email}</p>
-                </div>
-                <div>
-                  <p className="font-medium">Phone</p>
-                  <p className="text-muted-foreground">
-                    {fetchedDeal.workPhone}
-                  </p>
-                </div>
-                <div>
-                  <p className="font-medium">Revenue</p>
-                  <p className="text-muted-foreground">
-                    ${fetchedDeal.revenue.toLocaleString()}
-                  </p>
-                </div>
-                <div>
-                  <p className="font-medium">LinkedIn</p>
-                  <p className="text-muted-foreground">
-                    {fetchedDeal.linkedinUrl ? (
-                      <a
-                        href={fetchedDeal.linkedinUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-500 hover:underline"
-                      >
-                        View Profile
-                      </a>
-                    ) : (
-                      "Not available"
-                    )}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Screening Component */}
           <div className="md:col-span-2">
             <ScreenDealComponent deal={fetchedDeal} />
           </div>
         </div>
+
+        <h2 className="">View Screening Results</h2>
+        <Suspense
+          fallback={
+            <div className="flex flex-col gap-4">
+              <AIReasoningSkeleton />
+              <AIReasoningSkeleton />
+              <AIReasoningSkeleton />
+            </div>
+          }
+        >
+          <RenderDealScreenings dealId={uid} dealType={fetchedDeal.dealType} />
+        </Suspense>
       </div>
     </section>
   );
 };
 
 export default ScreenDealPage;
+
+async function RenderDealScreenings({
+  dealId,
+  dealType,
+}: {
+  dealId: string;
+  dealType: DealType;
+}) {
+  const dealScreenings = await prismaDB.aiScreening.findMany({
+    where: { dealId },
+    select: {
+      id: true,
+      title: true,
+      explanation: true,
+      sentiment: true,
+      deal: {
+        select: {
+          dealType: true,
+        },
+      },
+    },
+  });
+
+  return (
+    <div className="grid gap-6 md:grid-cols-2">
+      {dealScreenings.length > 0 ? (
+        dealScreenings.map((e, index) => (
+          <AIReasoning
+            key={index}
+            title={e.title}
+            explanation={e.explanation}
+            sentiment={e.sentiment}
+            dealId={dealId}
+            dealType={dealType}
+            screeningId={e.id}
+          />
+        ))
+      ) : (
+        <div className="flex flex-col items-center justify-center text-center">
+          <AlertTriangle className="mb-4 h-12 w-12 text-muted-foreground" />
+          <h3 className="text-lg font-semibold">No AI Reasoning Available</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            AI analysis for this deal has not been generated yet. Check back
+            later or request an analysis.
+          </p>
+          <Button className="mt-4" variant="outline">
+            Request AI Analysis
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}

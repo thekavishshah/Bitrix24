@@ -12,21 +12,43 @@ import screenDeal from "@/app/actions/screen-deal";
 import { screeningSaveResult } from "@/app/actions/screening-save-result";
 import { Skeleton } from "./ui/skeleton";
 import axios from "axios";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
+import { Switch } from "./ui/switch";
+import { Slider } from "./ui/slider";
+import { EvalOptions } from "@/app/types";
 
 const ScreenDealComponent = ({ deal }: { deal: Deal }) => {
   const [isPending, startTransition] = useTransition();
   const [isSaving, startSavingTransition] = useTransition();
   const [screeningResult, setScreeningResult] = useState<string>("");
   const [annotations, setAnnotations] = useState<string[]>([]);
+  const [evalOptions, setEvalOptions] = useState<EvalOptions>({
+    userPrompt: "",
+    sections: ["score", "risks"],
+    tone: "bullet",
+    detailLevel: "deep",
+    scale: "0-100",
+    language: "en",
+    format: "markdown",
+    framework: "swot",
+    temperature: 0.7,
+  });
 
   const handleScreenDeal = async () => {
     setScreeningResult(""); // Clear previous results
     startTransition(async () => {
       try {
-        const response = await axios.get("/api/screen", {
-          params: {
-            deal,
-          },
+        const response = await axios.post("/api/screen", {
+          deal,
+          ...evalOptions,
         });
 
         const result = await response.data;
@@ -46,6 +68,11 @@ const ScreenDealComponent = ({ deal }: { deal: Deal }) => {
 
   const handleSaveResult = async () => {
     startSavingTransition(async () => {
+      if (!screeningResult) {
+        toast.error("No screening result to save");
+        return;
+      }
+
       const response = await screeningSaveResult(screeningResult, deal.id);
       if (response.type === "error") {
         toast.error(response.message);
@@ -99,6 +126,120 @@ const ScreenDealComponent = ({ deal }: { deal: Deal }) => {
         </CardTitle>
       </CardHeader>
       <CardContent>
+        <div className="mb-4 grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="userPrompt">Additional Instructions</Label>
+            <Input
+              id="userPrompt"
+              value={evalOptions.userPrompt}
+              onChange={(e) =>
+                setEvalOptions({ ...evalOptions, userPrompt: e.target.value })
+              }
+              placeholder="Enter any additional instructions..."
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="tone">Analysis Tone</Label>
+            <Select
+              value={evalOptions.tone}
+              onValueChange={(value) =>
+                setEvalOptions({
+                  ...evalOptions,
+                  tone: value as "bullet" | "narrative",
+                })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select tone" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="bullet">Bullet Points</SelectItem>
+                <SelectItem value="narrative">Narrative</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="detailLevel">Detail Level</Label>
+            <Select
+              value={evalOptions.detailLevel}
+              onValueChange={(value) =>
+                setEvalOptions({
+                  ...evalOptions,
+                  detailLevel: value as "short" | "deep",
+                })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select detail level" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="short">Short</SelectItem>
+                <SelectItem value="deep">Deep</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="scale">Rating Scale</Label>
+            <Select
+              value={evalOptions.scale}
+              onValueChange={(value) =>
+                setEvalOptions({
+                  ...evalOptions,
+                  scale: value as "0-100" | "0-10",
+                })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select scale" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0-100">0-100</SelectItem>
+                <SelectItem value="0-10">0-10</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="framework">Analysis Framework</Label>
+            <Select
+              value={evalOptions.framework}
+              onValueChange={(value) =>
+                setEvalOptions({
+                  ...evalOptions,
+                  framework: value as "swot" | "porter",
+                })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select framework" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="swot">SWOT</SelectItem>
+                <SelectItem value="porter">
+                  Porter&apos;s Five Forces
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="temperature">AI Temperature</Label>
+            <div className="flex items-center gap-2">
+              <Slider
+                id="temperature"
+                min={0}
+                max={1}
+                step={0.1}
+                value={[evalOptions.temperature || 0.7]}
+                onValueChange={([value]) =>
+                  setEvalOptions({ ...evalOptions, temperature: value })
+                }
+                className="w-full"
+              />
+              <span className="text-sm text-muted-foreground">
+                {evalOptions.temperature}
+              </span>
+            </div>
+          </div>
+        </div>
         <ScrollArea className="h-[600px] pr-4">
           {isPending ? (
             <div className="space-y-4">

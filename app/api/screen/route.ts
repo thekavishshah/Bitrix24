@@ -1,10 +1,23 @@
+import { EvalOptions } from "@/app/types";
 import { auth } from "@/auth";
 import { openaiClient } from "@/lib/ai/available-models";
 import { NextResponse } from "next/server";
 
 export const maxDuration = 30;
 
-export async function GET(req: Request) {
+function buildSystemMessage(opts: EvalOptions) {
+  return `
+You are a senior investment analyst at Dark Alpha Capital.
+Write in ${opts.tone ?? "narrative"} style, ${opts.detailLevel ?? "medium"} depth.
+Respond in ${opts.language ?? "en-US"}.
+Use a ${opts.scale ?? "0-100"} scoring scale.
+Include ONLY these sections: ${(opts.sections ?? ["title", "explanation", "score"]).join(", ")}.
+${opts.framework ? `Structure the explanation as a ${opts.framework.toUpperCase()} analysis.` : ""}
+${opts.format === "json" ? "Output MUST follow the attached JSON Schema." : "Return well-formatted Markdown."}
+`;
+}
+
+export async function POST(req: Request) {
   const session = await auth();
 
   if (!session?.user) {
@@ -18,7 +31,43 @@ export async function GET(req: Request) {
     );
   }
 
-  const { deal } = await req.json();
+  const {
+    deal,
+    userPrompt,
+    sections,
+    tone,
+    detailLevel,
+    scale,
+    language,
+    format,
+    framework,
+    temperature,
+  } = await req.json();
+
+  const opts = {
+    userPrompt,
+    sections,
+    tone,
+    detailLevel,
+    scale,
+    language,
+    format,
+  };
+
+  console.log({
+    deal,
+    userPrompt,
+    sections,
+    tone,
+    detailLevel,
+    scale,
+    language,
+    format,
+    framework,
+    temperature,
+  });
+
+  const sysMsg = buildSystemMessage(opts);
 
   try {
     const response = await openaiClient.responses.create({
@@ -32,13 +81,15 @@ export async function GET(req: Request) {
       ],
       input: [
         {
-          role: "system",
-          content:
-            "You are a senior investment analyst at Dark Alpha Capital, specializing in evaluating deals based on our firm's proprietary screening criteria. Utilize the provided vector store to retrieve relevant guidelines and apply them meticulously to assess the given deal. Your evaluation should include:\n\n- A clear title summarizing the deal.\n- An explanation detailing how the deal aligns or misaligns with our screening criteria.\n- An overall sentiment classification: Positive, Neutral, or Negative.\n- A numerical score between 0 and 100, reflecting the deal's alignment with our criteria.\n\nIf specific information is unavailable, explicitly state this in your explanation. Ensure your response is structured to match the predefined schema for seamless integration.",
+          role: "system" as const,
+          content: sysMsg,
         },
+        ...(opts.userPrompt
+          ? [{ role: "user" as const, content: opts.userPrompt }]
+          : []),
         {
-          role: "user",
-          content: `Please evaluate the following deal: ${JSON.stringify(deal)}`,
+          role: "user" as const,
+          content: `Evaluate this deal:\n${JSON.stringify(deal)}`,
         },
       ],
     });
@@ -48,6 +99,7 @@ export async function GET(req: Request) {
 
     // Extract just the annotations and text from the response
     const messageContent = response.output_text;
+    // const messageContent = "test";
     return NextResponse.json({
       text: messageContent,
     });

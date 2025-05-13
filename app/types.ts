@@ -35,3 +35,15 @@ export type ManualDeal = {
   company_location?: string; // Location of the company (optional)
   created_at: Timestamp;
 };
+
+export type EvalOptions = {
+  userPrompt?: string;
+  sections?: string[];
+  tone?: "bullet" | "narrative";
+  detailLevel?: "short" | "deep";
+  scale?: "0-100" | "0-10";
+  language?: string;
+  format?: "markdown" | "json";
+  framework?: "swot" | "porter";
+  temperature?: number;
+};
