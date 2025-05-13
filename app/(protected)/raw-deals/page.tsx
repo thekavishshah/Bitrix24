@@ -14,6 +14,7 @@ import SearchDealsSkeleton from "@/components/skeletons/SearchDealsSkeleton";
 import SearchEbitdaDeals from "@/components/SearchEbitdaDeals";
 import DealTypeFilterSkeleton from "@/components/skeletons/DealTypeFilterSkeleton";
 import UserDealFilter from "@/components/UserDealFilter";
+import DealContainer from "@/components/DealContainer";
 
 export const metadata: Metadata = {
   title: "Raw Deals",
@@ -94,11 +95,13 @@ const RawDealsPage = async (props: { searchParams: SearchParams }) => {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {data.map((e) => (
-              <DealCard key={e.id} deal={e} userRole={currentUserRole!} />
-            ))}
-          </div>
+          <DealContainer
+            data={data}
+            userRole={currentUserRole!}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalCount={totalCount}
+          />
         )}
       </div>
       <Pagination totalPages={totalPages} />

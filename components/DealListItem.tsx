@@ -1,0 +1,48 @@
+import React from "react";
+import Link from "next/link";
+import type { Deal } from "@prisma/client";
+
+interface Props {
+  deal: Deal;
+  selected: boolean;
+  onToggle: () => void;
+}
+
+export default function DealListItem({ deal, selected, onToggle }: Props) {
+  return (
+    <div className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-muted/50">
+      <div className="flex flex-1 items-center gap-3">
+        <input
+          type="checkbox"
+          checked={selected}
+          onChange={onToggle}
+          className="h-4 w-4 rounded border-input bg-background text-primary focus:ring-2 focus:ring-ring focus:ring-offset-2"
+        />
+        <div>
+          <h3 className="text-lg font-semibold text-foreground">
+            {deal.dealCaption}
+          </h3>
+          <div className="text-sm text-muted-foreground">
+            Revenue: ${deal.revenue} · EBITDA: ${deal.ebitda} ·{" "}
+            {deal.industry || "—"}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-shrink-0 gap-2">
+        <Link
+          href={`/raw-deals/${deal.id}`}
+          className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+        >
+          View Details
+        </Link>
+        <Link
+          href={`/raw-deals/${deal.id}/screen`}
+          className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
+        >
+          Screen Deal
+        </Link>
+      </div>
+    </div>
+  );
+}
